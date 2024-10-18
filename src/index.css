@@ -1,3 +1,211 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body, html {
+
+    height: 100%;
+    font-family: 'Poppins', sans-serif;
+
+  }
+  
+  a {
+    text-decoration: none;
+    color: #6c63ff;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  
+  /* Left Panel */
+  .left-panel, .right-panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 250px;
+   
+  }
+  
+  .left-panel {
+    background-color: #f4f5f7;
+    height: 100vh;
+    margin-bottom: 205px;
+  }
+  span{
+   margin-bottom: 800px;
+   
+  }
+  
+  .form-container {
+    background-color: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: 500px;
+    max-width: 1000px;
+    margin-top: 20px;
+    margin-right: 90px;
+  }
+  
+  .form-container h2 {
+    font-size: 30px;
+    margin-bottom: 20px;
+  }
+  
+  .form-container p {
+    margin-bottom: 25px;
+    font-size: 14px;
+    color: #1e1d1d;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 20px;
+    font-size: 25px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    margin-top: 10px;
+  }
+  
+  .forgot-password {
+    text-align: right;
+    margin-bottom: 20px;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 20px;
+    background-color: #6c63ff;
+    box-shadow: 0px 4px 10px rgba(7, 227, 81, 0.1);
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .btn:hover {
+    background-color: #5a52e0;
+  }
+  
+  .helper-text {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #ffefc5;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .helper-text strong {
+    color: #d9534f;
+  }
+  
+  /* Right Panel */
+  .right-panel {
+   background-image: url(file.jpg);
+   background-repeat: no-repeat;
+    color: white;
+    height: 100vh;
+    padding: 200px;
+    padding-top: 100px;
+    margin-bottom: 200px;
+  }
+  
+  .right-panel-content {
+    text-align: center;
+    margin-bottom: 00px;
+    color: #050505;
+    margin-bottom: 700px;
+  }
+  
+  .right-panel-content h2 {
+    color: #6c63ff;
+    font-size: 26px;
+    margin-bottom: 15px;
+  }
+  
+  .right-panel-content p {
+    color: #ccc;
+    margin-bottom: 30px;
+  }
+  
+  .promo-image {
+    width: 100%;
+    max-width: 350px;
+  }
+  .tag h1{
+    margin-bottom: 800px;
+    margin-right: 100px;
+    background-color: #5a52e0;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 900px) {
+    .container {
+      flex-direction: column;
+      overflow: hidden;
+    
+    }
+  
+    .left-panel, .right-panel {
+      flex: none;
+      width: 100%;
+      
+    }
+    .form-container{
+      width: 2000px;
+      margin-left: 100px;
+    }
+  
+    .right-panel {
+      background-image: url(../signbackHero.jpg);
+      padding: 20px;
+      text-align: center;
+      margin-right: 20px;
+      margin-bottom: 100px;
+      width: 500px;
+      height: 100vh;
+      /* display: none; */
+    }
+    .form-group input {
+        width: 200px;
+    }
+    .tag{
+      flex-direction: column;
+    }
+    .right-panel-content h2{
+      margin-left: 50px;
+    }
+    .right-panel-content p{
+       font-size: 10px;
+       margin-left: 50px;
+    }
+    
+  }
+  
