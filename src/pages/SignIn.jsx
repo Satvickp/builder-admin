@@ -19,7 +19,7 @@ function SignIn() {
             <label htmlFor="password">Password</label>
             <input type="password" id="password" placeholder="••••••••" required />
           </div>
-          <Link to="/dashboard" className="btn">
+          <Link to="/" className="btn">
             Sign In
           </Link>
         </form>
@@ -29,7 +29,7 @@ function SignIn() {
     <div className="right-panel">
       <div className="right-panel-content">
         <h2>Welcome to Prism-Gate</h2>
-        <p>A professional template that comes with ready-to-use MUI components.</p>
+        {/* <p>A professional template that comes with ready-to-use MUI components.</p> */}
       </div>
     </div>
   </div>
