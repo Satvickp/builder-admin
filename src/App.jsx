@@ -8,6 +8,10 @@ import Category from "./pages/Categories";
 import Inventory from "./pages/Inventory";
 import Products from "./pages/Products";
 import Reports from "./pages/Reports";
+import Expense from "./components/Expense";
+import Society from "./components/Society";
+import Master from "./components/Master";
+import Others from "./components/Others";
 
 function App() {
   return (
@@ -22,6 +26,16 @@ function App() {
           <Route path="/categories" element={<Category />} />
           <Route path="inventory" element={<Inventory />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/expense" element={<Expense />} />
+          <Route path="/society" element={<Society />} />
+          <Route path="/master" element={<Master />} />
+          <Route path="/others" element={<Others />} />
+
+          {/* Add any more router here */}
+
+
+
+          
         </Route>
       </Routes>
     </BrowserRouter>
