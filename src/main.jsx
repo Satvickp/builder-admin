@@ -5,9 +5,6 @@ import './index.css'
 import { store } from './redux/Store.js'
 import { Provider } from 'react-redux'
 
-// import SignIn from './pages/SignIn.jsx'
-// import Dashboard from './pages/Dashboard.jsx'
-
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>

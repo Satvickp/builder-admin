@@ -3,8 +3,17 @@ import './Style.css'
 import 
  {BsFillBellFill, BsFillEnvelopeFill, BsPersonCircle, BsSearch, BsJustify}
  from 'react-icons/bs'
+import { useNavigate } from 'react-router-dom'
 
 function Header({OpenSidebar}) {
+
+  const navigate = useNavigate();
+
+  function handleLogout(){
+    window.sessionStorage.removeItem("token")
+    navigate("/");
+  };
+
   return (
     <header className='header'>
         <div className='menu-icon'>
@@ -16,7 +25,7 @@ function Header({OpenSidebar}) {
         <div className='header-right ' >
             <BsFillBellFill className='icon'/>
             <BsFillEnvelopeFill className='icon'/>
-            <BsPersonCircle className='icon'/>
+            <BsPersonCircle className='icon' onClick={handleLogout}/>
         </div>
     </header>
   )

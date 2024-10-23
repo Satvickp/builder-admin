@@ -1,10 +1,21 @@
 import React from 'react';
 import Dashboard from './Dashboard';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 
 
 function SignIn() {
+
+  const navigate = useNavigate();
+
+  function handleSignIn(){
+
+    // login api call
+    
+    window.sessionStorage.setItem("token", "this is a dummy token")
+    navigate('/');
+  }
+
   return (
     <div className="container">
     <div className="left-panel">
@@ -19,9 +30,9 @@ function SignIn() {
             <label htmlFor="password">Password</label>
             <input type="password" id="password" placeholder="••••••••" required />
           </div>
-          <Link to="/" className="btn">
+          <button className='btn' onClick={handleSignIn}>
             Sign In
-          </Link>
+          </button>
         </form>
       </div>
     </div>

@@ -1,12 +1,12 @@
-import React from 'react'
 import Table from 'react-bootstrap/Table';
 import 'bootstrap/dist/css/bootstrap.min.css';
-function Reports() {
+
+function Flats() {
   return (
     <div className='w-full bg-slate-700 pt-20 px-8 mx-auto'>  {/* Reduced width and centered */}
       <div className='flex justify-between items-center mb-6'>
         <div className='w-1/3'>  {/* Width decreased to 33% */}
-          <h1 className='text-white ml-4 text-4xl'>Reports</h1>
+          <h1 className='text-white ml-4 text-4xl'>Flats</h1>
         </div>
         <div className='w-1/3 flex justify-end'>  {/* Width decreased to 33% and button aligned right */}
           <button className='bg-blue-800 text-white px-6 py-2 rounded mr-4 w-80'>Add</button>
@@ -55,7 +55,7 @@ function Reports() {
         </tbody>
       </Table>
     </div>
-  );
+  )
 }
 
-export default Reports
+export default Flats;

@@ -11,7 +11,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
     >
       <div className="sidebar-title border-b-2">
         <div className="sidebar-brand flex gap-2">
-          <BsPersonCircle className="w-8 h-8" /> Prism Gate
+          <BsPersonCircle className="w-8 h-8" /> Builder Admin
         </div>
         <span className="icon close_icon" onClick={OpenSidebar}>
           X
