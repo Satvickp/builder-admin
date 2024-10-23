@@ -1,0 +1,20 @@
+.container-fluid{
+  width: 2000px;
+  padding: 200px;
+}
+.text-right{
+  width: 40px;
+}
+.mr-2{
+  width: 40px;
+}
+.btn {
+  width:20%;
+}
+.Col{
+  width: 10px;
+  font-size: 40px;
+}
+h1{
+  font-size: 100px;
+}
