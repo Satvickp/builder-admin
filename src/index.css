@@ -1,6 +1,6 @@
-@tailwind base;
+@tailwind base; 
 @tailwind components;
-@tailwind utilities;
+ @tailwind utilities;   
 
 
 /* Global Styles */
@@ -11,7 +11,8 @@
   }
   
   body, html {
-
+    background-color: #1d2634;
+    color: #f4f5f7;
     height: 100%;
     font-family: 'Poppins', sans-serif;
 
