@@ -31,13 +31,15 @@ const FlatMaster = () => {
 
   const fetchFlats = async () => {
     dispatch(setLoading('loading'));
-    try {
-      const response = await getFlatMasterById(flatId); // Replace this with a method to get all flats
-      dispatch(setFlats(response));
-    } catch (err) {
-      dispatch(setError(err.message));
-    } finally {
-      dispatch(setLoading('succeeded'));
+    if(!flats.length > 0 && flatId){
+      try {
+        const response = await getFlatMasterById(flatId); // Replace this with a method to get all flats
+        dispatch(setFlats(response));
+      } catch (err) {
+        dispatch(setError(err.message));
+      } finally {
+        dispatch(setLoading('succeeded'));
+      }
     }
   };
 

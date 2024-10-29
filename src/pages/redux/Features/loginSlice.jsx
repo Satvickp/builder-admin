@@ -4,9 +4,10 @@ const initialState = {
   loading: false,
   token: null,
   error: null,
+  isAuthenticated: false,
 };
 
- export const userSlice = createSlice({
+export const userSlice = createSlice({
   name: 'login',
   initialState,
   reducers: {
@@ -15,20 +16,22 @@ const initialState = {
       state.error = null;
     },
     loginSuccess(state, action) {
-        console.log("Login Success Payload:", action.payload);
+      console.log("Login Success Payload:", action.payload);
       state.loading = false;
       state.token = action.payload.token;
+      state.isAuthenticated = true; 
       window.sessionStorage.setItem('token', action.payload.token);
     },
     loginFailure(state, action) {
       state.loading = false;
       state.error = action.payload;
+      state.isAuthenticated = false; 
     },
   },
 });
 
-// Export actions
+
 export const { loginRequest, loginSuccess, loginFailure } = userSlice.actions;
 
-// Export the reducer
+
 export default userSlice.reducer;

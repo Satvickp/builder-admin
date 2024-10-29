@@ -22,16 +22,16 @@ export const SideBarData = [
         route: "/states",
     },
     {
-        id: 3,
-        name: "Flats",
-        icon: <BsFillGrid3X3GapFill className="w-5 h-5" />,
-        route: "/flats",
-    },
-    {
         id: 4,
         name: "Sites",
         icon: <BsFillArchiveFill className="w-5 h-5" />,
         route: "/sites",
+    },
+    {
+        id: 3,
+        name: "Flats",
+        icon: <BsFillGrid3X3GapFill className="w-5 h-5" />,
+        route: "/flats",
     },
     {
         id: 5,

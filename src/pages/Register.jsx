@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerRequest, registerSuccess, registerFailure } from './redux/Features/registerSlice';
 import axios from 'axios';
+import { Link } from 'react-router-dom'
 
 const Register = () => {
   const dispatch = useDispatch();
@@ -45,9 +46,12 @@ const Register = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[url('Rimage.jpg')] bg-cover bg-center h-screen p-4">
-      <form onSubmit={handleRegister} className="bg-gray-700 p-6 rounded-lg shadow-md w-full max-w-sm md:max-w-md">
+      <form onSubmit={handleRegister} className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm md:max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-black text-center">Register</h2>
-
+        <p className="text-md font-medium mb-4 text-gray-700">
+            Already Registered ? Please head to 
+            <Link to="/" className="text-blue-600 underline ml-1">Sign In</Link>
+          </p>
         <div className="mb-4">
           <input
             type="text"
@@ -56,7 +60,7 @@ const Register = () => {
             value={formData.username}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border bg-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+            className="w-full px-3 py-2 border bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
           />
         </div>
 
@@ -68,7 +72,7 @@ const Register = () => {
             value={formData.builderName}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border bg-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+            className="w-full px-3 py-2 border bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
           />
         </div>
 
@@ -80,7 +84,7 @@ const Register = () => {
             value={formData.password}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border bg-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+            className="w-full px-3 py-2 border bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
           />
         </div>
 
@@ -92,7 +96,7 @@ const Register = () => {
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border bg-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+            className="w-full px-3 py-2 border bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
           />
         </div>
 
@@ -104,7 +108,7 @@ const Register = () => {
             value={formData.mobileNo}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border bg-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+            className="w-full px-3 py-2 border bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
           />
         </div>
 
