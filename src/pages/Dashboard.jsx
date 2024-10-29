@@ -13,7 +13,7 @@ function Dashboard() {
   return (
     <>
       <div >
-      <div className='grid-container'>
+      <div className='grid-container bg-slate-600'>
       <Header OpenSidebar={OpenSidebar}/>
       <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar}/>
       <Outlet />

@@ -3,7 +3,7 @@
  @tailwind utilities;   
 
 
-/* Global Styles */
+/* Global Styles
 * {
     margin: 0;
     padding: 0;
@@ -37,7 +37,7 @@
   
   
   /* Left Panel */
-  .left-panel, .right-panel {
+  /* .left-panel, .right-panel {
     flex: 1;
     display: flex;
     justify-content: center;
@@ -130,11 +130,11 @@
   
   .helper-text strong {
     color: #d9534f;
-  }
+  } */
   
   /* Right Panel */
-  .right-panel {
-   background-image: url(file.jpg);
+  /* .right-panel {
+    background-image: url(file.jpg); 
    background-repeat: no-repeat;
     color: white;
     height: 100vh;
@@ -169,10 +169,10 @@
     margin-bottom: 800px;
     margin-right: 100px;
     background-color: #5a52e0;
-  }
+  } */
   
   /* Responsive Styles */
-  @media (max-width: 900px) {
+  /* @media (max-width: 900px) {
     .container {
       flex-direction: column;
       overflow: hidden;
@@ -196,9 +196,9 @@
       margin-right: 20px;
       margin-bottom: 100px;
       width: 500px;
-      height: 100vh;
+      height: 100vh; */
       /* display: none; */
-    }
+    /* }
     .form-group input {
         width: 200px;
     }
@@ -213,5 +213,5 @@
        margin-left: 50px;
     }
     
-  }
-  
+  } */
+   

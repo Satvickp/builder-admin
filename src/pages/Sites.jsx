@@ -1,60 +1,165 @@
-import Table from 'react-bootstrap/Table';
+// src/components/SiteMaster.js
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Table, Button, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-function Sites() {
+
+import {
+  setSiteMasters,
+  setLoading,
+  setError,
+} from './redux/Features/siteMasterSlice';
+
+import {
+  createSiteMaster,
+  updateSiteMaster,
+  getAllSiteMastersByState,
+} from './redux/Features/SiteApi/SiteApi';
+
+const SiteMaster = () => {
+  const dispatch = useDispatch();
+  const { data,  status, error } = useSelector((state) => state.siteMaster);
+
+  const [showModal, setShowModal] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [siteId, setSiteId] = useState(1);
+  const [stateId, setStateId] = useState(null);
+
+  const [newSite, setNewSite] = useState({
+    name: '',
+    totalUnits: '',
+    monthlyChargesType: 0,
+    flatTypes: [],
+    stateMasterId: 1,
+  });
+
+  // Fetch all site masters
+  const fetchSiteMasters = async () => {
+    dispatch(setLoading());
+    try {
+      const response = await getAllSiteMastersByState(stateId);
+      dispatch(setSiteMasters(response.data));
+    } catch (err) {
+      dispatch(setError(err.message));
+    }
+  };
+
+  useEffect(() => {
+    fetchSiteMasters();
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewSite({ ...newSite, [name]: value });
+  };
+
+  const handleCreate = async () => {
+    dispatch(setLoading());
+    try {
+      await createSiteMaster(newSite);
+      fetchSiteMasters();
+      setShowModal(false);
+      setNewSite({ name: '', totalUnits: '', monthlyChargesType: 0, flatTypes: [], stateMasterId: 1 });
+    } catch (err) {
+      dispatch(setError(err.message));
+    }
+  };
+
+  const handleUpdate = async () => {
+    dispatch(setLoading());
+    try {
+      await updateSiteMaster(siteId, newSite);
+      fetchSiteMasters();
+      setShowModal(false);
+      setNewSite({ name: '', totalUnits: '',  flatTypes: [], stateMasterId: 1 });
+    } catch (err) {
+      dispatch(setError(err.message));
+    }
+  };
+ 
+  const handleEdit = (site) => {
+    setNewSite(site);
+    setSiteId(site.id);
+    setIsEdit(true);
+    setShowModal(true);
+  };
   return (
-    <div className='w-full bg-slate-700 pt-20 px-8 mx-auto'>  {/* Reduced width and centered */}
-      <div className='flex justify-between items-center mb-6'>
-        <div className='w-1/3'>  {/* Width decreased to 33% */}
-          <h1 className='text-white ml-4 text-4xl'>Sites</h1>
-        </div>
-        <div className='w-1/3 flex justify-end'>  {/* Width decreased to 33% and button aligned right */}
-          <button className='bg-blue-800 text-white px-6 py-2 rounded mr-4 text-3xl w-80'>Add</button>
-        </div>
+    <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-white text-4xl">Site</h1>
+        <Button variant="primary" className="w-80" onClick={() => { setIsEdit(false); setShowModal(true); }}>
+          Add New Site 
+        </Button>
       </div>
-      <Table striped bordered hover className='w-full'> {/* Table takes up full width of container */}
+
+      {status === 'loading' && <p>Loading...</p>}
+      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+
+      <Table striped bordered hover className="w-full">
         <thead>
           <tr>
-            <th>#</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Username</th>
-            <th>Action</th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Total Units</th>
+            <th>Flat Types</th>
+            <th>State Master ID</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-            <td>
-              <button className='bg-red-700 text-white px-2 py-1'>delete</button> {/* Button padding adjusted */}
-              <button className='bg-green-500 text-white px-2 py-1 ml-2'>edit</button> {/* Button padding adjusted */}
-            </td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
-            <td>
-              <button  className='bg-red-700 text-white px-2 py-1'>delete</button>
-              <button className='bg-green-500 text-white px-2 py-1 ml-2'>edit</button>
-            </td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td colSpan={2}>Larry the Bird</td>
-            <td>@twitter</td>
-            <td>
-              <button className='bg-red-700 text-white px-2 py-1'>delete</button>
-              <button className='bg-green-500 text-white px-2 py-1 ml-2'>edit</button>
-            </td>
-          </tr>
+          {data.length > 0 ? (
+            data.map((site) => (
+              <tr key={site.id}>
+                <td>{site.id}</td>
+                <td>{site.name}</td>
+                <td>{site.totalUnits}</td>
+                <td>{site.flatTypes.join(', ')}</td>
+                <td>{site.stateMasterId}</td>
+                <td>
+                  <Button variant="warning" onClick={() => handleEdit(site)}>Edit</Button>{' '}
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="7" className="text-center">No site masters available.</td>
+            </tr>
+          )}
         </tbody>
       </Table>
+
+      {/* Modal for Add/Edit Site Master */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} className="mt-40">
+        <Modal.Header closeButton>
+          <Modal.Title>{isEdit ? 'Edit Site Master' : 'Add New Site Master'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={(e) => { e.preventDefault(); isEdit ? handleUpdate() : handleCreate(); }}>
+            <div className="mb-3">
+              <label className="form-label">Name</label>
+              <input type="text" className="form-control" name="name" value={newSite.name} onChange={handleChange} required />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Total Units</label>
+              <input type="number" className="form-control" name="totalUnits" value={newSite.totalUnits} onChange={handleChange} required />
+            </div>
+           
+            <div className="mb-3">
+              <label className="form-label">Flat Types</label>
+              <input type="text" className="form-control" name="flatTypes" value={newSite.flatTypes.join(',')} onChange={(e) => handleChange({ target: { name: 'flatTypes', value: e.target.value.split(',') } })} placeholder="Separate by commas (e.g., 1000, 1500)" required />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">State Master ID</label>
+              <input type="number" className="form-control" name="stateMasterId" value={newSite.stateMasterId} onChange={handleChange} required />
+            </div>
+            <Button variant="primary" type="submit">
+              {isEdit ? 'Update Site Master' : 'Add Site Master'}
+            </Button>
+          </form>
+        </Modal.Body>
+      </Modal>
     </div>
   );
-}
+};
 
-export default Sites;
+export default SiteMaster;

@@ -10,8 +10,8 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
       className={openSidebarToggle ? "sidebar-responsive" : ""}
     >
       <div className="sidebar-title border-b-2">
-        <div className="sidebar-brand flex gap-2">
-          <BsPersonCircle className="w-8 h-8" /> Builder Admin
+        <div className="sidebar-brand flex gap-2 text-white">
+          <BsPersonCircle className="w-8 h-8 text-white" /> Builder Admin
         </div>
         <span className="icon close_icon" onClick={OpenSidebar}>
           X

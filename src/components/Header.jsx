@@ -19,10 +19,10 @@ function Header({OpenSidebar}) {
         <div className='menu-icon'>
             <BsJustify className='icon' onClick={OpenSidebar}/>
         </div>
-        <div className='header-left'>
+        <div className='header-left text-white'>
             <BsSearch  className='icon'/>
         </div>
-        <div className='header-right ' >
+        <div className='header-right text-white ' >
             <BsFillBellFill className='icon'/>
             <BsFillEnvelopeFill className='icon'/>
             <BsPersonCircle className='icon' onClick={handleLogout}/>
