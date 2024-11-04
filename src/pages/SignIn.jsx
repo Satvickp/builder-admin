@@ -48,7 +48,7 @@ function SignIn() {
             <form onSubmit={handleSignIn}>
               <div className="form-group mb-4">
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                  Email address
+                  Username
                 </label>
                 <input
                   type="text"

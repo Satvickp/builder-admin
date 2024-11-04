@@ -17,3 +17,11 @@ export const updateFlatMaster = async (id, flatData) => {
   const response = await axios.put(`${BASE_URL}/update/${id}`, flatData);
   return response.data;
 };
+export const getAllFlatMastersBySite = (siteId) =>
+  axios.get(`${BASE_URL}/site/${siteId}`, {
+    headers: {
+      'Accept': '*/*',
+      'Content-Type': 'application/json',
+    },
+  });
+
