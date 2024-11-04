@@ -1,4 +1,3 @@
-// src/components/FlatMaster.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -10,10 +9,17 @@ import { createFlatMaster, getFlatMasterById, updateFlatMaster } from './redux/F
 
 const FlatMaster = () => {
   const dispatch = useDispatch();
-  const flats = useSelector(selectFlats);
+  const flats = useSelector(selectFlats) || [];
   const loading = useSelector(selectLoading);
   const error = useSelector(selectError);
+  const SiteData = useSelector((state) => state.siteMaster);
+  const { data } = SiteData || {};
+  console.log(data);
+
+  // State for selected site ID and name
   const [selectedSiteId, setSelectedSiteId] = useState(null);
+  const [selectedSiteName, setSelectedSiteName] = useState("Select Site"); // Default label
+
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [flatId, setFlatId] = useState(null);
@@ -31,10 +37,10 @@ const FlatMaster = () => {
 
   const fetchFlats = async () => {
     dispatch(setLoading('loading'));
-    if(!flats.length > 0 && flatId){
+    if (!flats.length && flatId) {
       try {
-        const response = await getFlatMasterById(flatId); // Replace this with a method to get all flats
-        dispatch(setFlats(response));
+        const response = await getFlatMasterById(selectedSiteId);
+        dispatch(setFlats(response || []));
       } catch (err) {
         dispatch(setError(err.message));
       } finally {
@@ -44,8 +50,10 @@ const FlatMaster = () => {
   };
 
   useEffect(() => {
-    fetchFlats();
-  }, []);
+    console.log("1")
+    //fetchFlats();
+    if  (selectedSiteId) fetchFlats(selectedSiteId);
+  }, [selectedSiteId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,24 +96,47 @@ const FlatMaster = () => {
     setShowModal(true);
   };
 
+  const handleSiteSelect = (id) => {
+    setSelectedSiteId(id);
+    const selectedSite = data.find((site) => site.id === id);
+    setSelectedSiteName(selectedSite ? selectedSite.name : "Select Site"); // Update button label
+  };
+
   return (
     <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
-      <div className="d-flex justify-content-between mb-4">
-        <h2 className='text-white ml-4 text-4xl'>Flats</h2>
-        <Button variant="primary" className='w-96 flex justify-center' onClick={() => { setShowModal(true); setIsEdit(false); }}>
-          Add New Flat
-        </Button>
-        <DropdownButton id="dropdown-basic-button" title="Select Site" value={selectedSiteId} onChange={((e) => setSelectedSiteId(e.target.value))}>
-          <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-          <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-          <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
-        </DropdownButton>
+      <div className="flex gap-3 justify-between items-center mb-6">
+        <h1 className="text-white text-4xl">Flats</h1>
+        <div className="flex gap-3">
+          <Button
+            variant="primary"
+            className="px-3"
+            onClick={() => {
+              setIsEdit(false);
+              setShowModal(true);
+            }}
+          >
+            Add New Flat
+          </Button>
+          <Dropdown onSelect={(eventKey) => handleSiteSelect(eventKey)}>
+            <Dropdown.Toggle variant="success" id="dropdown-basic">
+              select Site {" "}
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              {data && data.map((item) => (
+                <Dropdown.Item key={item.id} eventKey={item.id}>
+                  {item.name} {/* Display site name */}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
       </div>
 
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
-      <Table striped bordered hover>
+      <Table striped bordered hover className="w-full">
         <thead>
           <tr>
             <th>Flat No</th>
@@ -124,39 +155,77 @@ const FlatMaster = () => {
                 <td>{flat.area}</td>
                 <td>{flat.emailId}</td>
                 <td>
-                  <Button variant="warning" onClick={() => handleEdit(flat)}>Edit</Button>
+                  <Button variant="warning" onClick={() => handleEdit(flat)}>
+                    Edit
+                  </Button>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="5" className="text-center">No flats available.</td>
+              <td colSpan="5" className="text-center">
+                No flats available.
+              </td>
             </tr>
           )}
         </tbody>
       </Table>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal show={showModal} onHide={() => setShowModal(false)}
+        className='mt-40'>
         <Modal.Header closeButton>
           <Modal.Title>{isEdit ? 'Edit Flat' : 'Add New Flat'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form onSubmit={(e) => { e.preventDefault(); isEdit ? handleUpdate() : handleCreate(); }}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              isEdit ? handleUpdate() : handleCreate();
+            }}
+          >
             <div className="mb-3">
               <label className="form-label">Flat No</label>
-              <input type="text" className="form-control" name="flatNo" value={newFlat.flatNo} onChange={handleChange} required />
+              <input
+                type="text"
+                className="form-control"
+                name="flatNo"
+                value={newFlat.flatNo}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div className="mb-3">
               <label className="form-label">Owner Name</label>
-              <input type="text" className="form-control" name="ownerName" value={newFlat.ownerName} onChange={handleChange} required />
+              <input
+                type="text"
+                className="form-control"
+                name="ownerName"
+                value={newFlat.ownerName}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div className="mb-3">
               <label className="form-label">Area</label>
-              <input type="text" className="form-control" name="area" value={newFlat.area} onChange={handleChange} required />
+              <input
+                type="text"
+                className="form-control"
+                name="area"
+                value={newFlat.area}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div className="mb-3">
               <label className="form-label">Email ID</label>
-              <input type="email" className="form-control" name="emailId" value={newFlat.emailId} onChange={handleChange} required />
+              <input
+                type="email"
+                className="form-control"
+                name="emailId"
+                value={newFlat.emailId}
+                onChange={handleChange}
+                required
+              />
             </div>
             <Button variant="primary" type="submit">
               {isEdit ? 'Update Flat' : 'Add Flat'}

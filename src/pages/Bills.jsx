@@ -145,6 +145,11 @@ const BillManager = () => {
           </td>
         </tr>
       ))}
+        <tr>
+              <td colSpan="6" className="text-center">
+                No Bill  available.
+              </td>
+            </tr>
     </tbody>
   </Table>
   <Modal show={showModal} onHide={() => setShowModal(false)} className="mt-40">
