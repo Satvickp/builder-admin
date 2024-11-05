@@ -20,6 +20,9 @@ const flatSlice = createSlice({
     setError: (state, action) => {
       state.error = action.payload;
     },
+    // setFlats: (state, action) => {
+    //   state.flats = action.payload;
+    // },
     setFlats: (state, action) => {
       state.flats = action.payload;
     },

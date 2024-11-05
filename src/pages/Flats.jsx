@@ -1,28 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import { Table, Button, Modal } from 'react-bootstrap';
+import { Table, Button, Modal, Dropdown } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { setFlats, setLoading, setError, addFlat, updateFlat, selectFlats, selectLoading, selectError } from './redux/Features/FlatSlice';
-import { createFlatMaster, getFlatMasterById, updateFlatMaster } from './redux/Features/FlatApi/FlatApi';
+
+import {
+  setFlats,
+  setLoading,
+  setError,
+  addFlat,
+  updateFlat,
+  selectFlats,
+  selectLoading,
+  selectError
+} from './redux/Features/FlatSlice';
+import {
+  createFlatMaster,
+  getFlatMasterById,
+  updateFlatMaster
+} from './redux/Features/FlatApi/FlatApi';
 
 const FlatMaster = () => {
   const dispatch = useDispatch();
+
   const flats = useSelector(selectFlats) || [];
   const loading = useSelector(selectLoading);
   const error = useSelector(selectError);
+  
   const SiteData = useSelector((state) => state.siteMaster);
-  const { data } = SiteData || {};
-  console.log(data);
-
-  // State for selected site ID and name
-  const [selectedSiteId, setSelectedSiteId] = useState(null);
-  const [selectedSiteName, setSelectedSiteName] = useState("Select Site"); // Default label
-
+  const { data: siteData } = SiteData || {};
+  
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [flatId, setFlatId] = useState(null);
+  const [selectedSiteId, setSelectedSiteId] = useState(null);
 
   const [newFlat, setNewFlat] = useState({
     flatNo: '',
@@ -35,24 +45,21 @@ const FlatMaster = () => {
     openingBalance: 0,
   });
 
-  const fetchFlats = async () => {
+  const fetchFlats = async (siteId) => {
+    if (!siteId) return;
     dispatch(setLoading('loading'));
-    if (!flats.length && flatId) {
-      try {
-        const response = await getFlatMasterById(selectedSiteId);
-        dispatch(setFlats(response || []));
-      } catch (err) {
-        dispatch(setError(err.message));
-      } finally {
-        dispatch(setLoading('succeeded'));
-      }
+    try {
+      const response = await getFlatMasterById(siteId);
+      if(response) dispatch(addFlat(response));
+    } catch (err) {
+      dispatch(setError(err.message));
+    } finally {
+      dispatch(setLoading('succeeded'));
     }
   };
 
   useEffect(() => {
-    console.log("1")
-    //fetchFlats();
-    if  (selectedSiteId) fetchFlats(selectedSiteId);
+    if (selectedSiteId) fetchFlats(selectedSiteId);
   }, [selectedSiteId]);
 
   const handleChange = (e) => {
@@ -67,8 +74,19 @@ const FlatMaster = () => {
     dispatch(setLoading('loading'));
     try {
       const createdFlat = await createFlatMaster(newFlat);
+      console.log(createdFlat)
       dispatch(addFlat(createdFlat));
       setShowModal(false);
+      setNewFlat({
+        flatNo: '',
+        ownerName: '',
+        area: '',
+        emailId: '',
+        siteMasterId: selectedSiteId || 1,
+        creditDays: 30,
+        remark: '',
+        openingBalance: 0,
+      });
     } catch (err) {
       dispatch(setError(err.message));
     } finally {
@@ -96,10 +114,8 @@ const FlatMaster = () => {
     setShowModal(true);
   };
 
-  const handleSiteSelect = (id) => {
-    setSelectedSiteId(id);
-    const selectedSite = data.find((site) => site.id === id);
-    setSelectedSiteName(selectedSite ? selectedSite.name : "Select Site"); // Update button label
+  const handleSiteSelect = (siteId) => {
+    setSelectedSiteId(siteId);
   };
 
   return (
@@ -109,7 +125,6 @@ const FlatMaster = () => {
         <div className="flex gap-3">
           <Button
             variant="primary"
-            className="px-3"
             onClick={() => {
               setIsEdit(false);
               setShowModal(true);
@@ -119,13 +134,12 @@ const FlatMaster = () => {
           </Button>
           <Dropdown onSelect={(eventKey) => handleSiteSelect(eventKey)}>
             <Dropdown.Toggle variant="success" id="dropdown-basic">
-              select Site {" "}
+              Select Site
             </Dropdown.Toggle>
-
             <Dropdown.Menu>
-              {data && data.map((item) => (
-                <Dropdown.Item key={item.id} eventKey={item.id}>
-                  {item.name} {/* Display site name */}
+              {siteData && siteData.map((site) => (
+                <Dropdown.Item key={site.id} eventKey={site.id}>
+                  {site.name}
                 </Dropdown.Item>
               ))}
             </Dropdown.Menu>
@@ -171,10 +185,12 @@ const FlatMaster = () => {
         </tbody>
       </Table>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}
-        className='mt-40'>
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+      >
         <Modal.Header closeButton>
-          <Modal.Title>{isEdit ? 'Edit Flat' : 'Add New Flat'}</Modal.Title>
+          <Modal.Title>{isEdit ? "Edit Flat" : "Add New Flat"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form
@@ -217,7 +233,7 @@ const FlatMaster = () => {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Email ID</label>
+              <label className="form-label">Email</label>
               <input
                 type="email"
                 className="form-control"
@@ -228,7 +244,7 @@ const FlatMaster = () => {
               />
             </div>
             <Button variant="primary" type="submit">
-              {isEdit ? 'Update Flat' : 'Add Flat'}
+              {isEdit ? "Update Flat" : "Add Flat"}
             </Button>
           </form>
         </Modal.Body>
