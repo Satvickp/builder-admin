@@ -21,7 +21,7 @@ function App() {
       {window.sessionStorage.getItem("token") ? (
         <Routes>
           <Route path="/" element={<Dashboard />}>
-            <Route path="/" element={<Home />} />
+            <Route path="" element={<Home />} />
             <Route path="/states" element={<States />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/sites" element={<Sites />} />
@@ -38,7 +38,7 @@ function App() {
         </Routes>
       ) : (
         <Routes>
-          <Route path="/" element={<SignIn />} />
+          <Route path="" element={<SignIn />} />
           <Route path="/register" element={<Register />} />
           <Route path="*" element={<Error />} />
         </Routes>

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import { loginRequest, loginSuccess, loginFailure } from './redux/Features/loginSlice';
+import { loginRequest, loginSuccess, loginFailure } from '../redux/Features/loginSlice';
 import { Link, useNavigate } from 'react-router-dom';
 
 function SignIn() {
-  const [username, setusername] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -13,30 +13,31 @@ function SignIn() {
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-
     dispatch(loginRequest());
 
     try {
       const response = await axios.post('https://api-dev.prismgate.in/bill-generator-service/users/login', {
-        username: username,
-        password: password,
+        username,
+        password,
         builderName: 'Anand Verma',
       }, {
         headers: { 'Content-Type': 'application/json' },
       });
 
       dispatch(loginSuccess(response.data));
+      navigate('/');
     } catch (error) {
       dispatch(loginFailure('Failed to login. Please check your credentials.'));
-      console.log("Error:: ", error)
+      console.log("Error:: ", error);
     }
+    // 
   };
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/');
-    }
-  }, [isAuthenticated, navigate]);
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     navigate('/'); // Redirect to home page after successful login
+  //   }
+  // }, [isAuthenticated, navigate]);
 
   return (
     <div className="p-0 flex items-center justify-center min-h-screen w-full bg-[#1d2634] text-[#f4f5f7] font-poppins">
@@ -55,7 +56,7 @@ function SignIn() {
                   id="username"
                   placeholder="Username"
                   value={username}
-                  onChange={(e) => setusername(e.target.value)}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                   className="w-full mt-1 p-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -98,6 +99,6 @@ function SignIn() {
       </div>
     </div>
   );
-};
+}
 
 export default SignIn;

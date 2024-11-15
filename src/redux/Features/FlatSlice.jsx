@@ -4,7 +4,7 @@ import {
   createFlatMaster,
   getFlatMasterById,
   updateFlatMaster
-} from './FlatApi/FlatApi';
+} from '../../Api/FlatApi/FlatApi';
 
 const flatSlice = createSlice({
   name: 'flat',
@@ -15,19 +15,17 @@ const flatSlice = createSlice({
   },
   reducers: {
     setLoading: (state, action) => {
-      state.loading = action.payload === 'loading';
+      state.loading = action.payload;
     },
     setError: (state, action) => {
       state.error = action.payload;
     },
-    // setFlats: (state, action) => {
-    //   state.flats = action.payload;
-    // },
     setFlats: (state, action) => {
-      state.flats = action.payload;
+      console.log("flat in slice :",action.payload.flats)
+      state.flats = action.payload.flats;
     },
     addFlat: (state, action) => {
-      state.flats.push(action.payload);
+      state.flats = [action.payload, ...state.flats];
     },
     updateFlat: (state, action) => {
       const index = state.flats.findIndex(flat => flat.id === action.payload.id);

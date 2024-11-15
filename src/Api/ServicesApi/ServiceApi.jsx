@@ -1,10 +1,13 @@
 // src/api/serviceMasterApi.js
 import axios from 'axios';
+import { BASE_URL } from "../../utils/BaseUrl"
 
-const BASE_URL = 'https://api-dev.prismgate.in/bill-generator-service/service-masters';
+// const BASE_URL = 'https://api-dev.prismgate.in/bill-generator-service/service-masters';
+
+const baseUrl =  `${BASE_URL.DEV_URL}/bill-generator-service/service-masters`
 
 export const createServiceMaster = (data) =>
-  axios.post(`${BASE_URL}/create`, data, {
+  axios.post(`${ baseUrl}/create`, data, {
     headers: {
       Accept: '*/*',
       'Content-Type': 'application/json',
@@ -12,7 +15,7 @@ export const createServiceMaster = (data) =>
   });
 
 export const updateServiceMaster = (id, data) =>
-  axios.put(`${BASE_URL}/update/${id}`, data, {
+  axios.put(`${ baseUrl}/update/${id}`, data, {
     headers: {
       Accept: '*/*',
       'Content-Type': 'application/json',
@@ -20,7 +23,7 @@ export const updateServiceMaster = (id, data) =>
   });
 
 export const getServiceMaster = (id) =>
-  axios.get(`${BASE_URL}/${id}`, {
+  axios.get(`${ baseUrl}/${id}`, {
     headers: {
       Accept: '*/*',
       'Content-Type': 'application/json',
@@ -28,7 +31,7 @@ export const getServiceMaster = (id) =>
   });
 
 export const getAllServiceMasters = () =>
-  axios.get(`${BASE_URL}/all`, {
+  axios.get(`${ baseUrl}/all`, {
     headers: {
       Accept: '*/*',
       'Content-Type': 'application/json',

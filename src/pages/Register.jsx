@@ -1,7 +1,7 @@
 // src/components/Register.js
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerRequest, registerSuccess, registerFailure } from './redux/Features/registerSlice';
+import { registerRequest, registerSuccess, registerFailure } from '../redux/Features/registerSlice';
 import axios from 'axios';
 import { Link } from 'react-router-dom'
 
@@ -27,7 +27,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        'http://195.35.22.253:8097/bill-generator-service/users/register',
+        'https://api-dev.prismgate.in/bill-generator-service/users/register',
         formData,
         {
           headers: {

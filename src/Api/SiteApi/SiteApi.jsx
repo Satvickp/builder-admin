@@ -1,10 +1,13 @@
 // src/api/siteMasterApi.js
 import axios from 'axios';
+import { BASE_URL } from "../../utils/BaseUrl"
 
-const BASE_URL = 'https://api-dev.prismgate.in/bill-generator-service/site-masters';
+// const BASE_URL = 'https://api-dev.prismgate.in/bill-generator-service/site-masters';
+
+const baseUrl =  `${BASE_URL.DEV_URL}/bill-generator-service/site-masters`
 
 export const createSiteMaster = (data) =>
-  axios.post(`${BASE_URL}/create`, data, {
+  axios.post(`${baseUrl}/create`, data, {
     headers: {
       'Accept': '*/*',
       'Content-Type': 'application/json',
@@ -12,23 +15,27 @@ export const createSiteMaster = (data) =>
   });
 
 export const updateSiteMaster = (id, data) =>
-  axios.put(`${BASE_URL}/update/${id}`, data, {
+  axios.put(`${baseUrl}/update/${id}`, data, {
     headers: {
       'Accept': '*/*',
       'Content-Type': 'application/json',
     },
   });
 
-export const getSiteMaster = (id) =>
-  axios.get(`${BASE_URL}/${id}`, {
+export const getSiteMaster = async (id) =>{
+  const resp = await axios.get(`${baseUrl}/${id}`, {
     headers: {
       'Accept': '*/*',
       'Content-Type': 'application/json',
     },
+  
   });
+  console.log(resp.data)
+  return resp.data;
+}
 
 export const getAllSiteMastersByState = (stateId) =>
-  axios.get(`${BASE_URL}/state/${stateId}`, {
+  axios.get(`${baseUrl}/state/${stateId}`, {
     headers: {
       'Accept': '*/*',
       'Content-Type': 'application/json',

@@ -9,8 +9,8 @@ import {
   setLoading,
   setError,
   selectStateMasters
-} from './redux/Features/stateMasterSlice';
-import { getStates, createState, updateState, deleteState } from './api/api/stateapi/stateMasterApi';
+} from '../redux/Features/stateMasterSlice';
+import { getStates, createState, updateState, deleteState } from '../Api/stateapi/stateMasterApi';
 
 function States() {
   const dispatch = useDispatch();
@@ -37,6 +37,19 @@ function States() {
       monthlyCharges: '',
       origin: ''
     });
+  };
+
+  const fetchStateMasters = async () => {
+    dispatch(setLoading('loading'));
+    try {
+      const states = await getStates();
+      dispatch(setStateMasters(states));
+      dispatch(setLoading('succeeded'));
+    } catch (error) {
+      console.error('Error fetching state masters:', error.message || error);
+      dispatch(setError('Failed to fetch state masters'));
+      dispatch(setLoading('failed'));
+    }
   };
 
   const  handleShow = () => setShow(true);
@@ -75,31 +88,18 @@ function States() {
     handleShow();
   };
 
-  const handleDelete = async (code) => {
-    try {
-      await deleteState(code);
-      const updatedStateMasters = stateMasters.filter(state => state.code !== code);
-      dispatch(setStateMasters(updatedStateMasters));
-    } catch (error) {
-      console.error('Error deleting state master:', error.message || error);
-      dispatch(setError('Failed to delete state master'));
-    }
-  };
+  // const handleDelete = async (code) => {
+  //   try {
+  //     await deleteState(code);
+  //     const updatedStateMasters = stateMasters.filter(state => state.code !== code);
+  //     dispatch(setStateMasters(updatedStateMasters));
+  //   } catch (error) {
+  //     console.error('Error deleting state master:', error.message || error);
+  //     dispatch(setError('Failed to delete state master'));
+  //   }
+  // };
 
   useEffect(() => {
-    const fetchStateMasters = async () => {
-      dispatch(setLoading('loading'));
-      try {
-        const states = await getStates();
-        dispatch(setStateMasters(states));
-        dispatch(setLoading('succeeded'));
-      } catch (error) {
-        console.error('Error fetching state masters:', error.message || error);
-        dispatch(setError('Failed to fetch state masters'));
-        dispatch(setLoading('failed'));
-      }
-    };
-
     fetchStateMasters();
   }, [dispatch]);
 

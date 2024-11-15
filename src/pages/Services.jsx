@@ -1,11 +1,10 @@
-// src/components/ServiceMaster.js
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Button, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import { setServiceMasters, setLoading, setError } from './redux/Features/ServiceSlice';
-import { createServiceMaster, updateServiceMaster, getAllServiceMasters } from './redux/Features/ServicesApi/ServiceApi';
+import { setServiceMasters, setLoading, setError } from '../redux/Features/ServiceSlice';
+import { createServiceMaster, updateServiceMaster, getAllServiceMasters } from '../Api/ServicesApi/ServiceApi';
 
 const ServiceMaster = () => {
   const dispatch = useDispatch();
@@ -17,13 +16,12 @@ const ServiceMaster = () => {
 
   const [newService, setNewService] = useState({
     name: '',
-    SACCode: '', // Keep SACCode as string
-    cgst: 0,
-    sgst: 0,
-    igst: 0,
+    SACCode: 'N', // Set default value of SACCode to 'N'
+    cgst: '',
+    sgst: '',
+    igst: '',
   });
 
-  // Fetch all service masters
   const fetchServiceMasters = async () => {
     dispatch(setLoading(true));
     try {
@@ -40,12 +38,27 @@ const ServiceMaster = () => {
     fetchServiceMasters();
   }, []);
 
+  useEffect(() => {
+    if (isEdit && serviceId !== null) {
+      // Populate form when in edit mode, set 'N' if SACCode is undefined
+      const serviceToEdit = services.find(service => service.id === serviceId);
+      if (serviceToEdit) {
+        setNewService({
+          name: serviceToEdit.name,
+          SACCode: serviceToEdit.SACCode || 'N', // Use 'N' as default if SACCode is empty
+          cgst: serviceToEdit.cgst,
+          sgst: serviceToEdit.sgst,
+          igst: serviceToEdit.igst,
+        });
+      }
+    }
+  }, [isEdit, serviceId, services]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Convert CGST, SGST, IGST values to numbers, but keep SACCode as string
     setNewService((prev) => ({
       ...prev,
-      [name]: name === 'SACCode' ? value : parseFloat(value),
+      [name]: name === 'SACCode' || name === 'name' ? value : parseFloat(value) || '', // Keep name and SACCode as string
     }));
   };
 
@@ -85,25 +98,23 @@ const ServiceMaster = () => {
   };
 
   const resetForm = () => {
-    setNewService({ name: '', SACCode: '', cgst: 0, sgst: 0, igst: 0 });
+    setNewService({ name: '', SACCode: 'N', cgst: '', sgst: '', igst: '' });
     setIsEdit(false);
+    setServiceId(null);
   };
 
   return (
     <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
-      {/* Header and Add Button */}
       <div className="flex gap-3 justify-between items-center mb-6">
         <h2 className='text-white ml-4 text-4xl'>Service</h2>
-        <Button variant="primary"className='w-80' onClick={() => { resetForm(); setShowModal(true); }}>
+        <Button variant="primary" className='w-80' onClick={() => { resetForm(); setShowModal(true); }}>
           Add New Service
         </Button>
       </div>
-  
-      {/* Loading and Error Messages */}
+
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-  
-      {/* Table for Service List */}
+
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -117,13 +128,12 @@ const ServiceMaster = () => {
           </tr>
         </thead>
         <tbody>
-          {/* Conditional rendering based on the length of services */}
           {services.length > 0 ? (
             services.map((service) => (
               <tr key={service.id}>
                 <td>{service.id}</td>
                 <td>{service.name}</td>
-                <td>{service.SACCode || 'NaN'}</td>
+                <td>{service.SACCode || 'N'}</td>
                 <td>{service.cgst}%</td>
                 <td>{service.sgst}%</td>
                 <td>{service.igst}%</td>
@@ -139,10 +149,8 @@ const ServiceMaster = () => {
           )}
         </tbody>
       </Table>
-  
-      {/* Modal for Add/Edit Service Master */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}
-        className='mt-40'>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)} className='mt-40'>
         <Modal.Header closeButton>
           <Modal.Title>{isEdit ? 'Edit Service Master' : 'Add New Service Master'}</Modal.Title>
         </Modal.Header>
