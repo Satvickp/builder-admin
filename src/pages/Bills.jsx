@@ -209,7 +209,7 @@ const BillManager = () => {
     <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-white text-4xl">Bill Manager</h2>
-        <Button variant="primary" onClick={openModal}>Add New Bill</Button>
+        <Button variant="primary" onClick={openModal}>Add New </Button>
       </div>
       {loading && <p className="text-white">Loading...</p>}
       {error && <p className="text-red-500">Error: {error}</p>}
