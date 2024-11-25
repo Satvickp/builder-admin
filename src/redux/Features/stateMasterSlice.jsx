@@ -13,7 +13,7 @@ export const stateMasterSlice = createSlice({
       state.stateMasters = action.payload;
     },
     addStateMaster: (state, action) => {
-      state.stateMasters.push(action.payload);
+      state.stateMasters = [action.payload, ...state.stateMasters];
     },
     updateStateMaster: (state, action) => {
       const index = state.stateMasters.findIndex(item => item.code === action.payload.code);

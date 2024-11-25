@@ -1,11 +1,12 @@
-// src/components/ServiceMaster.js
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Button, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { FaEdit } from "react-icons/fa";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
-import { setServiceMasters, setLoading, setError } from './redux/Features/ServiceSlice';
-import { createServiceMaster, updateServiceMaster, getAllServiceMasters } from './redux/Features/ServicesApi/ServiceApi';
+import { setServiceMasters, setLoading, setError } from '../redux/Features/ServiceSlice';
+import { createServiceMaster, updateServiceMaster, getAllServiceMasters } from '../Api/ServicesApi/ServiceApi';
 
 const ServiceMaster = () => {
   const dispatch = useDispatch();
@@ -17,20 +18,20 @@ const ServiceMaster = () => {
 
   const [newService, setNewService] = useState({
     name: '',
-    SACCode: '', // Keep SACCode as string
-    cgst: 0,
-    sgst: 0,
-    igst: 0,
+    saccode: '', // Updated field name
+    cgst: '',
+    sgst: '',
+    igst: '',
   });
 
-  // Fetch all service masters
   const fetchServiceMasters = async () => {
     dispatch(setLoading(true));
     try {
       const response = await getAllServiceMasters();
+      console.log("API Response:", response.data);
       dispatch(setServiceMasters(response.data));
     } catch (err) {
-      dispatch(setError(err.message));
+      dispatch(setError(err.message || 'Failed to fetch service masters.'));
     } finally {
       dispatch(setLoading(false));
     }
@@ -40,12 +41,26 @@ const ServiceMaster = () => {
     fetchServiceMasters();
   }, []);
 
+  useEffect(() => {
+    if (isEdit && serviceId !== null) {
+      const serviceToEdit = services.find(service => service.id === serviceId);
+      if (serviceToEdit) {
+        setNewService({
+          name: serviceToEdit.name,
+          saccode: serviceToEdit.saccode || '', // Updated field name
+          cgst: serviceToEdit.cgst,
+          sgst: serviceToEdit.sgst,
+          igst: serviceToEdit.igst,
+        });
+      }
+    }
+  }, [isEdit, serviceId, services]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Convert CGST, SGST, IGST values to numbers, but keep SACCode as string
     setNewService((prev) => ({
       ...prev,
-      [name]: name === 'SACCode' ? value : parseFloat(value),
+      [name]: name === 'saccode' || name === 'name' ? value : parseFloat(value) || '', // Ensure `saccode` is treated as a string
     }));
   };
 
@@ -57,7 +72,7 @@ const ServiceMaster = () => {
       setShowModal(false);
       resetForm();
     } catch (err) {
-      dispatch(setError(err.message));
+      dispatch(setError(err.message || 'Failed to create service.'));
     } finally {
       dispatch(setLoading(false));
     }
@@ -71,7 +86,7 @@ const ServiceMaster = () => {
       setShowModal(false);
       resetForm();
     } catch (err) {
-      dispatch(setError(err.message));
+      dispatch(setError(err.message || 'Failed to update service.'));
     } finally {
       dispatch(setLoading(false));
     }
@@ -85,25 +100,23 @@ const ServiceMaster = () => {
   };
 
   const resetForm = () => {
-    setNewService({ name: '', SACCode: '', cgst: 0, sgst: 0, igst: 0 });
+    setNewService({ name: '', saccode: '', cgst: '', sgst: '', igst: '' });
     setIsEdit(false);
+    setServiceId(null);
   };
 
   return (
     <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
-      {/* Header and Add Button */}
       <div className="flex gap-3 justify-between items-center mb-6">
         <h2 className='text-white ml-4 text-4xl'>Service</h2>
-        <Button variant="primary"className='w-80' onClick={() => { resetForm(); setShowModal(true); }}>
-          Add New Service
+        <Button variant="primary" onClick={() => { resetForm(); setShowModal(true); }}>
+          Add New
         </Button>
       </div>
-  
-      {/* Loading and Error Messages */}
+
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-  
-      {/* Table for Service List */}
+
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -117,18 +130,28 @@ const ServiceMaster = () => {
           </tr>
         </thead>
         <tbody>
-          {/* Conditional rendering based on the length of services */}
           {services.length > 0 ? (
             services.map((service) => (
               <tr key={service.id}>
                 <td>{service.id}</td>
                 <td>{service.name}</td>
-                <td>{service.SACCode || 'NaN'}</td>
+                <td>{service.saccode || 'N/A'}</td> {/* Updated field name */}
                 <td>{service.cgst}%</td>
                 <td>{service.sgst}%</td>
                 <td>{service.igst}%</td>
                 <td>
-                  <Button variant="warning" onClick={() => handleEdit(service)}>Edit</Button>
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={<Tooltip>Edit</Tooltip>}
+                  >
+                    <Button
+                      variant="link"
+                      className="p-0 text-primary"
+                      onClick={() => handleEdit(service)}
+                    >
+                      <FaEdit size={30} />
+                    </Button>
+                  </OverlayTrigger>
                 </td>
               </tr>
             ))
@@ -139,10 +162,8 @@ const ServiceMaster = () => {
           )}
         </tbody>
       </Table>
-  
-      {/* Modal for Add/Edit Service Master */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}
-        className='mt-40'>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)} className='mt-40'>
         <Modal.Header closeButton>
           <Modal.Title>{isEdit ? 'Edit Service Master' : 'Add New Service Master'}</Modal.Title>
         </Modal.Header>
@@ -154,7 +175,7 @@ const ServiceMaster = () => {
             </div>
             <div className="mb-3">
               <label className="form-label">SAC Code</label>
-              <input type="text" className="form-control" name="SACCode" value={newService.SACCode} onChange={handleChange} required />
+              <input type="text" className="form-control" name="saccode" value={newService.saccode} onChange={handleChange} />
             </div>
             <div className="mb-3">
               <label className="form-label">CGST (%)</label>
@@ -176,6 +197,6 @@ const ServiceMaster = () => {
       </Modal>
     </div>
   );
-}
+};
 
 export default ServiceMaster;
