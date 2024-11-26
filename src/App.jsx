@@ -1,48 +1,47 @@
+import React, { useState, useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import SignIn from "./pages/SignIn";
-import Dashboard from "./pages/Dashboard";
-import Home from "./components/Home";
-import Settings from "./pages/Settings";
-import Expense from "./components/Expense";
-import Society from "./components/Society";
-import Master from "./components/Master";
-import Others from "./components/Others";
-import Register from "./pages/Register";
-import Error from "./pages/Error";
-import States from "./pages/States";
-import Flats from "./pages/Flats";
-import Sites from "./pages/Sites";
-import Services from "./pages/Services";
-import Bills from "./pages/Bills";
+import { useDispatch } from "react-redux";
+import { loginFailure, loginSuccess } from "./redux/Features/loginSlice";
+import { setUser } from "./redux/Features/UserSlice";
+import {jwtDecode} from "jwt-decode";
+import AdminRoutes from "./utils/AdminRoutes";
+import AuthRoutes from "./utils/AuthRoutes";
 
 function App() {
+  const dispatch = useDispatch();
+  const [token, setToken] = useState(localStorage.getItem("USER_TOKEN"));
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setToken(localStorage.getItem("USER_TOKEN"));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        dispatch(setUser(decoded));
+        dispatch(loginSuccess({ token }));
+      } catch (error) {
+        dispatch(loginFailure("Failed to decode token."));
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, [token, dispatch]);
+
   return (
     <BrowserRouter>
-      {window.sessionStorage.getItem("token") ? (
-        <Routes>
-          <Route path="/" element={<Dashboard />}>
-            <Route path="" element={<Home />} />
-            <Route path="/states" element={<States />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/sites" element={<Sites />} />
-            <Route path="/flats" element={<Flats />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/bills" element={<Bills />} />
-            <Route path="/expense" element={<Expense />} />
-            <Route path="/society" element={<Society />} />
-            <Route path="/master" element={<Master />} />
-            <Route path="/others" element={<Others />} />
-            <Route path="*" element={<Error />} />
-            {/* Add any more router here */}
-          </Route>
-        </Routes>
-      ) : (
-        <Routes>
-          <Route path="" element={<SignIn />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="*" element={<Error />} />
-        </Routes>
-      )}
+      <Routes>
+        {token ? (
+          <Route path="/*" element={<AdminRoutes />} />
+        ) : (
+          <Route path="/*" element={<AuthRoutes />} />
+        )}
+      </Routes>
     </BrowserRouter>
   );
 }

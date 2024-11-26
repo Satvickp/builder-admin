@@ -36,6 +36,7 @@ const Register = () => {
           },
         }
       );
+      // redirect to menu by auto login if the registration is successfull
 
       dispatch(registerSuccess());
       console.log('User registered:', response.data);
