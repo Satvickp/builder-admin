@@ -23,21 +23,21 @@ export const updateFlatMaster = async (id, flatData) => {
   return response.data;
 };
 
-// New function to fetch flats by site ID and state ID with pagination and sorting
-export const getFlatsBySiteAndState = async (siteId, stateId) => {
-  // try {
-    const response = await axios.get(`${baseUrl}/getAllFlatsBySiteIdAndStateId/${siteId}/${stateId}`,);
-      // params: {
-      //   page: page,
-      //   size: size,
-      //   sortBy: sortBy,
-      //   sortDirection: sortDirection
-      // }
-  
-    return response.data;
- 
+// Function to fetch flats by site ID and state ID with pagination and sorting
+export const getFlatsBySiteAndState = async (siteId, stateId, page = 0, size = 10, sortBy = 'createdTime', sortDirection = 'desc') => {
+  const response = await axios.get(`${baseUrl}/getAllFlatsBySiteIdAndStateId/${siteId}/${stateId}`, {
+    params: { page, size, sortBy, sortDirection },
+  });
+  return response.data;
 };
 
+// **New Function**: Fetch all flats with pagination and sorting
+export const getAllFlats = async (page = 0, size = 10, sortBy = 'createdTime', sortDirection = 'desc') => {
+  const response = await axios.get(`${baseUrl}/getAllFlats`, {
+    params: { page, size, sortBy, sortDirection },
+  });
+  return response.data;
+};
 
 
 

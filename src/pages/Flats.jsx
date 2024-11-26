@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Button, Modal, Dropdown, FormControl } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 import { FaEdit } from "react-icons/fa";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import {
@@ -295,82 +296,103 @@ const FlatMaster = () => {
       </Table>
 
       {/* Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{isEdit ? 'Edit Flat' : 'Add New Flat'}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <form>
-            <div className="mb-3">
-              <label>Flat No</label>
-              <input
-                type="text"
-                className="form-control"
-                name="flatNo"
-                value={newFlat.flatNo}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="mb-3">
-              <label>Owner Name</label>
-              <input
-                type="text"
-                className="form-control"
-                name="ownerName"
-                value={newFlat.ownerName}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="mb-3">
-              <label>Area</label>
-              <input
-                type="text"
-                className="form-control"
-                name="area"
-                value={newFlat.area}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="mb-3">
-              <label>Email</label>
-              <input
-                type="email"
-                className="form-control"
-                name="emailId"
-                value={newFlat.emailId}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="mb-3">
-              <label>Opening Balance</label>
-              <input
-                type="number"
-                className="form-control"
-                name="openingBalance"
-                value={newFlat.openingBalance}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="mb-3">
-              <label>Remarks</label>
-              <textarea
-                className="form-control"
-                name="remark"
-                value={newFlat.remark}
-                onChange={handleChange}
-              />
-            </div>
-          </form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={isEdit ? handleUpdate : handleCreate}>
-            {isEdit ? 'Update Flat' : 'Add Flat'}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+     {/* Modal */}
+<Modal show={showModal} onHide={() => setShowModal(false)} centered>
+  <Modal.Header closeButton>
+    <Modal.Title>{isEdit ? 'Edit Flat' : 'Add New Flat'}</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <form>
+      <div className="mb-3">
+        <label>Flat No</label>
+        <input
+          type="text"
+          className="form-control"
+          name="flatNo"
+          value={newFlat.flatNo}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-3">
+        <label>Owner Name</label>
+        <input
+          type="text"
+          className="form-control"
+          name="ownerName"
+          value={newFlat.ownerName}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-3">
+        <label>Area</label>
+        <input
+          type="text"
+          className="form-control"
+          name="area"
+          value={newFlat.area}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-3">
+        <label>Email</label>
+        <input
+          type="email"
+          className="form-control"
+          name="emailId"
+          value={newFlat.emailId}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-3">
+        <label>Opening Balance</label>
+        <input
+          type="number"
+          className="form-control"
+          name="openingBalance"
+          value={newFlat.openingBalance}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-3">
+        <label>Remarks</label>
+        <textarea
+          className="form-control"
+          name="remark"
+          value={newFlat.remark}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="mb-3">
+  <label className="form-label">Select Site</label>
+  <Form.Select
+    name="siteMasterId"
+    value={selectedSiteId || ""}
+    onChange={(e) => setSelectedSiteId(e.target.value)}
+    required
+  >
+    <option value="" disabled>
+      Select Site
+    </option>
+    {siteMasters.map((site) => (
+      <option key={site.id} value={site.id}>
+        {site.name}
+      </option>
+    ))}
+  </Form.Select>
+</div>
+
+    </form>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setShowModal(false)}>
+      Close
+    </Button>
+    <Button variant="primary" onClick={isEdit ? handleUpdate : handleCreate}>
+      {isEdit ? 'Update Flat' : 'Add Flat'}
+    </Button>
+  </Modal.Footer>
+</Modal>
+
     </div>
   );
 };

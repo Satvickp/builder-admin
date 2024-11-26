@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { loginRequest, loginSuccess, loginFailure } from '../redux/Features/loginSlice';
 import { Link, useNavigate } from 'react-router-dom';
+//import jwt from 'jsonwebtoken';
 
 function SignIn() {
   const [username, setUsername] = useState('');
@@ -10,6 +11,9 @@ function SignIn() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error, isAuthenticated } = useSelector((state) => state.login);
+  //const decoded = jwt.decode(token);
+  //console.log(decoded)
+ 
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -19,7 +23,7 @@ function SignIn() {
       const response = await axios.post('https://api-dev.prismgate.in/bill-generator-service/users/login', {
         username,
         password,
-        builderName: 'Anand Verma',
+        //builderName: 'Anand Verma',
       }, {
         headers: { 'Content-Type': 'application/json' },
       });
