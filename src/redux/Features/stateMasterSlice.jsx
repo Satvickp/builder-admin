@@ -21,6 +21,13 @@ export const stateMasterSlice = createSlice({
         state.stateMasters[index] = action.payload;
       }
     },
+
+    deleteStateMaster: (state, action) => {
+      state.stateMasters = state.stateMasters.filter(
+        (state) => state.code !== action.payload
+      );
+    },
+    
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
