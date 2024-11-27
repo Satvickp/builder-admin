@@ -15,6 +15,7 @@ const ServiceMaster = () => {
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [serviceId, setServiceId] = useState(null);
+  const cred = useSelector(state => state.Cred);
 
   const [newService, setNewService] = useState({
     name: '',
@@ -27,7 +28,7 @@ const ServiceMaster = () => {
   const fetchServiceMasters = async () => {
     dispatch(setLoading(true));
     try {
-      const response = await getAllServiceMasters();
+      const response = await getAllServiceMasters(cred.id);
       console.log("API Response:", response.data);
       dispatch(setServiceMasters(response.data));
     } catch (err) {
@@ -67,7 +68,7 @@ const ServiceMaster = () => {
   const handleCreate = async () => {
     dispatch(setLoading(true));
     try {
-      await createServiceMaster(newService);
+      await createServiceMaster({...newService,builderId: cred.id});
       fetchServiceMasters();
       setShowModal(false);
       resetForm();
@@ -81,7 +82,7 @@ const ServiceMaster = () => {
   const handleUpdate = async () => {
     dispatch(setLoading(true));
     try {
-      await updateServiceMaster(serviceId, newService);
+      await updateServiceMaster(serviceId, newService, {...newService,builderId:cred.id});
       fetchServiceMasters();
       setShowModal(false);
       resetForm();

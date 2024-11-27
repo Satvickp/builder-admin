@@ -38,6 +38,7 @@ const FlatMaster = () => {
   const [flatId, setFlatId] = useState(null);
   const [selectedStateId, setSelectedStateId] = useState(null);
   const [selectedSiteId, setSelectedSiteId] = useState(null);
+   const cred = useSelector(state => state.Cred);
 
   const [newFlat, setNewFlat] = useState({
     flatNo: '',
@@ -67,7 +68,7 @@ const FlatMaster = () => {
 
   const fetchStates = async () => {
     try {
-      const states = await getStates();
+      const states = await getStates(cred.id);
       dispatch(setStateMasters(states));
     } catch (err) {
       dispatch(setError(err.message));
@@ -77,7 +78,7 @@ const FlatMaster = () => {
   const fetchSites = async (stateId) => {
     dispatch(setLoading('loading'));
     try {
-      const response = await getAllSiteMastersByState(stateId);
+      const response = await getAllSiteMastersByState(stateId,cred.id);
       dispatch(setSiteMasters(response.data));
     } catch (err) {
       dispatch(setError(err.message));
@@ -89,7 +90,7 @@ const FlatMaster = () => {
   const fetchFlats = async (siteId, stateId) => {
     dispatch(setLoading('loading'));
     try {
-      const response = await getFlatsBySiteAndState(siteId, stateId);
+      const response = await getFlatsBySiteAndState(siteId, stateId ,cred.id);
       dispatch(
         setFlats({
           flats: response.content,
@@ -120,7 +121,7 @@ const FlatMaster = () => {
 
     dispatch(setLoading('loading'));
     try {
-      const createdFlat = await createFlatMaster({ ...newFlat, siteMasterId: selectedSiteId });
+      const createdFlat = await createFlatMaster({ ...newFlat ,siteMasterId: selectedSiteId} );
       dispatch(addFlat(createdFlat));
       setShowModal(false);
       resetNewFlat();

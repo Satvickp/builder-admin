@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Table, Button, Modal, Form } from "react-bootstrap";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -11,19 +11,21 @@ import {
   createSiteMaster,
   updateSiteMaster,
   getAllSiteMastersByState,
-} from "../Api/SiteApi/SiteApi";
+  deleteSite,
+} from "../Api/SiteApi/SiteApi";  // Import the deleteSite API
 import { getStates } from "../Api/stateapi/stateMasterApi";
 
 const SiteMaster = () => {
   const dispatch = useDispatch();
   const { data, status, error } = useSelector((state) => state.siteMaster);
   const { stateMasters } = useSelector((state) => state.stateMaster);
+  const cred = useSelector(state => state.Cred);
 
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [siteId, setSiteId] = useState(null);
   const [stateId, setStateId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(""); // Search term for dropdown filtering
+  const [searchTerm, setSearchTerm] = useState(""); 
 
   const [newSite, setNewSite] = useState({
     name: "",
@@ -35,8 +37,17 @@ const SiteMaster = () => {
   const fetchSiteMasters = async (id) => {
     dispatch(setLoading());
     try {
-      const response = await getAllSiteMastersByState(id);
+      const response = await getAllSiteMastersByState(id, cred.id); 
       dispatch(setSiteMasters(response.data));
+    } catch (err) {
+      dispatch(setError(err.message));
+    }
+  };
+
+  const fetchStates = async () => {
+    try {
+      const states = await getStates(cred.id); 
+      dispatch(setStateMasters(states));
     } catch (err) {
       dispatch(setError(err.message));
     }
@@ -47,15 +58,6 @@ const SiteMaster = () => {
       fetchStates();
     }
   }, [dispatch, stateMasters.length]);
-
-  const fetchStates = async () => {
-    try {
-      const states = await getStates();
-      dispatch(setStateMasters(states));
-    } catch (err) {
-      dispatch(setError(err.message));
-    }
-  };
 
   useEffect(() => {
     if (stateId) {
@@ -83,7 +85,7 @@ const SiteMaster = () => {
   const handleCreate = async () => {
     dispatch(setLoading());
     try {
-      await createSiteMaster(newSite);
+      await createSiteMaster({ ...newSite, builderId: cred.id }); 
       fetchSiteMasters(stateId);
       setShowModal(false);
       setNewSite({
@@ -100,7 +102,7 @@ const SiteMaster = () => {
   const handleUpdate = async () => {
     dispatch(setLoading());
     try {
-      await updateSiteMaster(siteId, newSite);
+      await updateSiteMaster(siteId, { ...newSite, builderId: cred.id });
       fetchSiteMasters(stateId);
       setShowModal(false);
       setNewSite({
@@ -114,6 +116,18 @@ const SiteMaster = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this site?")) {
+      dispatch(setLoading());
+      try {
+        await deleteSite(id);  // Call the deleteSite API
+        fetchSiteMasters(stateId);  // Refresh the site list
+      } catch (err) {
+        dispatch(setError(err.message));
+      }
+    }
+  };
+
   const handleEdit = (site) => {
     setNewSite({
       ...site,
@@ -124,7 +138,6 @@ const SiteMaster = () => {
     setShowModal(true);
   };
 
-  // Filter state masters based on the search term
   const filteredStateMasters = stateMasters.filter((state) =>
     state.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -189,18 +202,16 @@ const SiteMaster = () => {
                     }
                   </td>
                   <td>
-                  <OverlayTrigger
-            placement="top"
-            overlay={<Tooltip>Edit</Tooltip>}
-          >
-            <Button
-              variant="link"
-              className="p-0 text-primary"
-              onClick={() => handleEdit(site)}
-            >
-              <FaEdit size={30} />
-            </Button>
-          </OverlayTrigger>
+                    <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
+                      <Button variant="link" className="p-0 text-primary" onClick={() => handleEdit(site)}>
+                        <FaEdit size={30} />
+                      </Button>
+                    </OverlayTrigger>
+                    <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
+                      <Button variant="link" className="p-0 text-danger" onClick={() => handleDelete(site.id)}>
+                        <FaTrash size={30} />
+                      </Button>
+                    </OverlayTrigger>
                   </td>
                 </tr>
               ))
@@ -216,98 +227,61 @@ const SiteMaster = () => {
       </div>
 
       <Modal show={showModal} onHide={() => setShowModal(false)} className="mt-40">
-  <Modal.Header closeButton>
-    <Modal.Title>{isEdit ? "Edit Site Master" : "Add New Site Master"}</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        isEdit ? handleUpdate() : handleCreate();
-      }}
-    >
-      <div className="mb-3">
-        <label className="form-label">Name</label>
-        <input
-          type="text"
-          className="form-control"
-          name="name"
-          value={newSite.name}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-3">
-        <label className="form-label">Total Units</label>
-        <input
-          type="number"
-          className="form-control"
-          name="totalUnits"
-          value={newSite.totalUnits}
-          onChange={handleChange}
-          required
-        />
-      </div>
+        <Modal.Header closeButton>
+          <Modal.Title>{isEdit ? "Edit Site Master" : "Add New Site Master"}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              isEdit ? handleUpdate() : handleCreate();
+            }}
+          >
+            <div className="mb-3">
+              <label className="form-label">Name</label>
+              <input
+                type="text"
+                className="form-control"
+                name="name"
+                value={newSite.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Total Units</label>
+              <input
+                type="number"
+                className="form-control"
+                name="totalUnits"
+                value={newSite.totalUnits}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-      <div className="mb-3">
-        <label className="form-label">Flat Types</label>
-        <input
-          type="text"
-          className="form-control"
-          name="flatTypes"
-          value={newSite.flatTypes.join(",")}
-          onChange={(e) =>
-            handleChange({
-              target: {
-                name: "flatTypes",
-                value: e.target.value.split(","),
-              },
-            })
-          }
-          placeholder="Comma separated (e.g., 1000, 1500)"
-          required
-        />
-      </div>
-
-      <div className="mb-3">
-        <label className="form-label">State Master ID</label>
-        <Form.Select
-          name="stateMasterId"
-          value={""}
-          onChange={handleChange}
-          required
-        >
-          <option value="" disabled>
-            Select State
-          </option>
-          {stateMasters.map((state) => (
-            <option key={state.id} value={state.id}>
-              {state.name}
-            </option>
-          ))}
-        </Form.Select>
-      </div>
-
-      <Button variant="primary" type="submit">
-        {isEdit ? "Update Site Master" : "Add Site Master"}
-      </Button>
-    </form>
-  </Modal.Body>
-</Modal>
-
+            <div className="mb-3">
+              <label className="form-label">Flat Types</label>
+              <input
+                type="text"
+                className="form-control"
+                name="flatTypes"
+                value={newSite.flatTypes.join(", ")}
+                onChange={(e) => setNewSite({ ...newSite, flatTypes: e.target.value.split(", ") })}
+                required
+              />
+            </div>
+            <Button variant="primary" type="submit">
+              {isEdit ? "Update Site" : "Add Site"}
+            </Button>
+          </form>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
 
 export default SiteMaster;
-
-
-
-
-
-
-
-
 
 
 
