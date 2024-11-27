@@ -2,38 +2,37 @@
 import axios from 'axios';
 import { BASE_URL } from "../../utils/BaseUrl";
 
-// Base URL for flat API
+
 const baseUrl = `${BASE_URL.DEV_URL}/bill-generator-service/flat-masters`;
 
-// Function to create a new flat
+
 export const createFlatMaster = async (flatData) => {
   const response = await axios.post(`${baseUrl}/create`, flatData);
   return response.data;
 };
 
-// Function to get a flat by its ID
+
 export const getFlatMasterById = async (id) => {
   const response = await axios.get(`${baseUrl}/${id}`);
   return response.data;
 };
 
-// Function to update an existing flat by its ID
 export const updateFlatMaster = async (id, flatData) => {
   const response = await axios.put(`${baseUrl}/update/${id}`, flatData);
   return response.data;
 };
 
-// Function to fetch flats by site ID and state ID with pagination and sorting
-export const getFlatsBySiteAndState = async (siteId, stateId, page = 0, size = 10, sortBy = 'createdTime', sortDirection = 'desc') => {
-  const response = await axios.get(`${baseUrl}/getAllFlatsBySiteIdAndStateId/${siteId}/${stateId}`, {
+ 
+export const getFlatsBySiteAndState = async (siteId, stateId,builderId, page = 0, size = 10, sortBy = 'createdTime', sortDirection = 'desc') => {
+  const response = await axios.get(`${baseUrl}/getAllFlatsBySiteIdAndStateId/${siteId}/${stateId}/${builderId}`, {
     params: { page, size, sortBy, sortDirection },
   });
   return response.data;
 };
 
-// **New Function**: Fetch all flats with pagination and sorting
-export const getAllFlats = async (page = 0, size = 10, sortBy = 'createdTime', sortDirection = 'desc') => {
-  const response = await axios.get(`${baseUrl}/getAllFlats`, {
+
+export const getAllFlats = async (builderId,page = 0, size = 10, sortBy = 'createdTime', sortDirection = 'desc') => {
+  const response = await axios.get(`${baseUrl}/getAllFlats/${builderId}`, {
     params: { page, size, sortBy, sortDirection },
   });
   return response.data;

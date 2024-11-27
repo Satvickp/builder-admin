@@ -8,7 +8,7 @@ const baseUrl =  `${BASE_URL.DEV_URL}/bill-generator-service/site-masters`
 
 export const createSiteMaster = (data) =>
   axios.post(`${baseUrl}/create`, data, {
-    headers: {
+    headers: { 
       'Accept': '*/*',
       'Content-Type': 'application/json',
     },
@@ -22,8 +22,8 @@ export const updateSiteMaster = (id, data) =>
     },
   });
 
-export const getSiteMaster = async (id) =>{
-  const resp = await axios.get(`${baseUrl}/${id}`, {
+export const getSiteMaster = async (builderId) =>{
+  const resp = await axios.get(`${baseUrl}/all/${builderId}`, {
     headers: {
       'Accept': '*/*',
       'Content-Type': 'application/json',
@@ -34,10 +34,19 @@ export const getSiteMaster = async (id) =>{
   return resp.data;
 }
 
-export const getAllSiteMastersByState = (stateId) =>
-  axios.get(`${baseUrl}/state/${stateId}`, {
+export const getAllSiteMastersByState = (stateId,builderId) =>
+  axios.get(`${baseUrl}/state/${stateId}/${builderId}`, {
     headers: {
       'Accept': '*/*',
       'Content-Type': 'application/json',
     },
   });
+
+  export const deleteSite = async (id) => {
+    await axios.delete(`${baseUrl}/delete/${id}`, {
+      headers: {
+        'accept': '*/*',
+        'Content-Type': 'application/json',
+      },
+    });
+  };

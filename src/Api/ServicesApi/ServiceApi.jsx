@@ -30,8 +30,8 @@ export const getServiceMaster = (id) =>
     },
   });
 
-export const getAllServiceMasters = () =>
-  axios.get(`${ baseUrl}/all`, {
+export const getAllServiceMasters = (builderId) =>
+  axios.get(`${ baseUrl}/all/${builderId}`, {
     headers: {
       Accept: '*/*',
       'Content-Type': 'application/json',
