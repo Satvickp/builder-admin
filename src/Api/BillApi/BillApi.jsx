@@ -62,18 +62,31 @@ export const markBillAsUnpaid = (id) =>
     },
   });
 
-export const getPendingBillsBySiteId = (siteId) =>
-  axios.get(`${baseUrl}/getAllPendingBills/${siteId}`, {
+export const getPendingBillsBySiteId = (siteId,builderId) =>
+  axios.get(`${baseUrl}/getAllPendingBills/${siteId}/${builderId}`, {
     headers: {
       'Accept': '*/*',
       'Content-Type': 'application/json',
     },
   });
 
-export const getAllPaidBillsBySiteId = (siteId) =>
-  axios.get(`${baseUrl}/getAllPaidBills/${siteId}`, {
+export const getAllPaidBillsBySiteId = (siteId,builderId) =>
+  axios.get(`${baseUrl}/getAllPaidBills/${siteId}/${builderId}`, {
     headers: {
       'Accept': '*/*',
       'Content-Type': 'application/json',
     },
   });
+
+
+  export const getAllBillsByServiceAndDocDate = (builderId, service, docDate) =>
+    axios.get(`${baseUrl}/getAllBillsByServiceAndDocDate/${builderId}`, {
+      params: {
+        service,
+        docDate,
+      },
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json',
+      },
+    });

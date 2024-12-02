@@ -12,6 +12,7 @@ const siteMasterSlice = createSlice({
   initialState,
   reducers: {
     setSiteMasters(state, action) {
+      console.log(action.payload)
       state.data = action.payload;
       state.status = 'succeeded';
     },
@@ -22,6 +23,23 @@ const siteMasterSlice = createSlice({
       state.status = 'failed';
       state.error = action.payload;
     },
+    addSiteMaster(state, action) {
+      state.data.push(action.payload);
+      state.status = 'succeeded';
+    },
+    updateSiteMaster(state, action) {
+      const updatedSite = action.payload;
+      const index = state.data.findIndex((site) => site.id === updatedSite.id);
+      if (index !== -1) {
+        state.data[index] = updatedSite;
+        state.status = 'succeeded';
+      }
+    },
+    deleteSiteMaster(state, action) {
+      const siteId = action.payload;
+      state.data = state.data.filter((site) => site.id !== siteId);
+      state.status = 'succeeded';
+    },
   },
 });
 
@@ -29,6 +47,9 @@ export const {
   setSiteMasters,
   setLoading,
   setError,
+  addSiteMaster,
+  updateSiteMaster,
+  deleteSiteMaster,
 } = siteMasterSlice.actions;
 
 export default siteMasterSlice.reducer;

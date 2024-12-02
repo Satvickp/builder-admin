@@ -33,6 +33,7 @@ import React, { useEffect, useState } from 'react';
     const siteMasters = useSelector(state => state.siteMaster.data) || [];
     const flats = useSelector(state => state.flat.flats || []);
     const services = useSelector(state => state.serviceMasters.services) || [];
+    const cred = useSelector(state => state.Cred);
   
     const [showModal, setShowModal] = useState(false);
     const [newBill, setNewBill] = useState({
@@ -53,7 +54,7 @@ import React, { useEffect, useState } from 'react';
   
     const fetchStates = async () => {
       try {
-        const states = await getStates();
+        const states = await getStates(cred.id);
         dispatch(setStateMasters(states));
       } catch (err) {
         dispatch(setError('Failed to load states.'));
@@ -66,7 +67,7 @@ import React, { useEffect, useState } from 'react';
   
     const fetchServices = async () => {
       try {
-        const response = await getAllServiceMasters();
+        const response = await getAllServiceMasters(cred.id);
         dispatch(setServiceMasters(response.data));
       } catch (err) {
         dispatch(setError('Failed to load services.'));
@@ -82,7 +83,7 @@ import React, { useEffect, useState } from 'react';
     const fetchSites = async (stateId) => {
       dispatch(setLoading(true));
       try {
-        const response = await getAllSiteMastersByState(stateId);
+        const response = await getAllSiteMastersByState(stateId,cred.id);
         dispatch(setSiteMasters(response.data));
       } catch (err) {
         dispatch(setError('Failed to load sites.'));
@@ -102,7 +103,7 @@ import React, { useEffect, useState } from 'react';
     const fetchFlats = async (stateId, siteId) => {
       dispatch(setLoading(true));
       try {
-        const response = await getFlatsBySiteAndState(stateId, siteId);
+        const response = await getFlatsBySiteAndState(siteId, stateId,cred.id);
         dispatch(setFlats({
           flats: response.content,
           totalElement: response.totalElement,
@@ -117,7 +118,7 @@ import React, { useEffect, useState } from 'react';
   
     const fetchPendingBills = async (siteId) => {
       try {
-        const response = await getPendingBillsBySiteId(siteId);
+        const response = await getPendingBillsBySiteId(siteId,cred.id);
         setPendingBills(response.data);
       } catch (err) {
         dispatch(setError('Failed to load pending bills.'));
@@ -126,7 +127,7 @@ import React, { useEffect, useState } from 'react';
   
     const fetchPaidBills = async (siteId) => {
       try {
-        const response = await getAllPaidBillsBySiteId(siteId);
+        const response = await getAllPaidBillsBySiteId(siteId,cred.id);
         setPaidBills(response.data);
       } catch (err) {
         dispatch(setError('Failed to load paid bills.'));
@@ -157,7 +158,10 @@ import React, { useEffect, useState } from 'react';
       e.preventDefault();
       dispatch(setLoading(true));
       try {
-        const response = await createBill(newBill);
+        const response = await createBill({
+          ...newBill, 
+          builderId: cred.id, 
+        });
         dispatch(addBill(response.data));
         closeModal();
       } catch (err) {
@@ -166,7 +170,7 @@ import React, { useEffect, useState } from 'react';
         dispatch(setLoading(false));
       }
     };
-  
+    
     const handleDeleteBill = async (id) => {
       try {
         await apiDeleteBill(id);

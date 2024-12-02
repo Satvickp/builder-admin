@@ -27,6 +27,7 @@ export const getFlatsBySiteAndState = async (siteId, stateId,builderId, page = 0
   const response = await axios.get(`${baseUrl}/getAllFlatsBySiteIdAndStateId/${siteId}/${stateId}/${builderId}`, {
     params: { page, size, sortBy, sortDirection },
   });
+  console.log(response)
   return response.data;
 };
 

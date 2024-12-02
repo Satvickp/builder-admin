@@ -37,3 +37,13 @@ export const getAllServiceMasters = (builderId) =>
       'Content-Type': 'application/json',
     },
   });
+
+
+  export const deleteService = async (id) => {
+    await axios.delete(`${baseUrl}/delete/${id}`, {
+      headers: {
+        'accept': '*/*',
+        'Content-Type': 'application/json',
+      },
+    });
+  };
