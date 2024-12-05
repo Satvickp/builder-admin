@@ -22,16 +22,16 @@ export const updateSiteMaster = (id, data) =>
   });
 
 
-export const getSiteMaster = async (builderId) => {
-  const resp = await axios.get(`${baseUrl}/all/${builderId}`, {
-    headers: {
-      'Accept': '*/*',
-      'Content-Type': 'application/json',
-    },
-  });
-  console.log(resp.data);
-  return resp.data;
-};
+// export const getSiteMaster = async (Id) => {
+//   const resp = await axios.get(`${baseUrl}/all/${Id}`, {
+//     headers: {
+//       'Accept': '*/*',
+//       'Content-Type': 'application/json',
+//     },
+//   });
+//   console.log(resp.data);
+//   return resp.data;
+// };
 
 
 export const getAllSiteMastersByState = (stateId, builderId) =>

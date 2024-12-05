@@ -6,8 +6,24 @@ import { BASE_URL } from "../../utils/BaseUrl"
 
 const baseUrl =  `${BASE_URL.DEV_URL}/bill-generator-service/bills`
 
-export const createBill = (data) =>
-  axios.post(`${baseUrl}/create`, data, {
+// export const createBill = (data) =>
+//   axios.post(`${baseUrl}/create`, data, {
+//     headers: {
+//       'Accept': '*/*',
+//       'Content-Type': 'application/json',
+//     },
+//   });
+
+export const createBillsWithFlatId = (data) =>
+  axios.post(`${baseUrl}/createWithFlatId`, data, {
+    headers: {
+      'Accept': '*/*',
+      'Content-Type': 'application/json',
+    },
+  });
+
+export const createBillsInBulkWithoutFlatId = (data) =>
+  axios.post(`${baseUrl}/createAllInBulkWithoutFlatId`, data, {
     headers: {
       'Accept': '*/*',
       'Content-Type': 'application/json',
@@ -62,14 +78,19 @@ export const markBillAsUnpaid = (id) =>
     },
   });
 
-export const getPendingBillsBySiteId = (siteId,builderId) =>
-  axios.get(`${baseUrl}/getAllPendingBills/${siteId}/${builderId}`, {
-    headers: {
-      'Accept': '*/*',
-      'Content-Type': 'application/json',
-    },
-  });
-
+  export const getPendingBillsBySiteId = (siteId, builderId, page = 0, size = 10, sortBy = 'createdTime', sortDirection = 'desc') =>
+    axios.get(`${baseUrl}/getAllPendingBills/${siteId}/${builderId}`, {
+      params: {
+        page,
+        size,
+        sortBy,
+        sortDirection,
+      },
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json',
+      },
+    });
 export const getAllPaidBillsBySiteId = (siteId,builderId) =>
   axios.get(`${baseUrl}/getAllPaidBills/${siteId}/${builderId}`, {
     headers: {
