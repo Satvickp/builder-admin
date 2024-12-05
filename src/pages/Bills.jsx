@@ -2,8 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { addBill, setError, setLoading, setBills } from '../redux/Features/BillSlice';
-import { createBillsInBulkWithoutFlatId, deleteBill as apiDeleteBill, markBillAsPaid, markBillAsUnpaid } from '../Api/BillApi/BillApi';
+import {
+  addBill,
+  setError,
+  setLoading,
+  setBills,
+} from '../redux/Features/BillSlice';
+import {
+  createBillsInBulkWithoutFlatId,
+  createBillsWithFlatId,
+  deleteBill as apiDeleteBill,
+  markBillAsPaid,
+  markBillAsUnpaid,
+} from '../Api/BillApi/BillApi';
 import { getStates } from '../Api/stateapi/stateMasterApi';
 import { setStateMasters } from '../redux/Features/stateMasterSlice';
 import { getAllSiteMastersByState } from '../Api/SiteApi/SiteApi';
@@ -16,19 +27,30 @@ import { getPendingBillsBySiteId, getAllPaidBillsBySiteId } from '../Api/BillApi
 
 const BillManager = () => {
   const dispatch = useDispatch();
-  const bills = useSelector(state => state.bills.bills);
-  const loading = useSelector(state => state.bills.loading);
-  const error = useSelector(state => state.bills.error);
-  const stateMasters = useSelector(state => state.stateMaster.stateMasters) || [];
-  const siteMasters = useSelector(state => state.siteMaster.data) || [];
-  const flats = useSelector(state => state.flat.flats || []);
-  const services = useSelector(state => state.serviceMasters.services) || [];
-  const cred = useSelector(state => state.Cred);
+  const bills = useSelector((state) => state.bills.bills);
+  const loading = useSelector((state) => state.bills.loading);
+  const error = useSelector((state) => state.bills.error);
+  const stateMasters = useSelector((state) => state.stateMaster.stateMasters) || [];
+  const siteMasters = useSelector((state) => state.siteMaster.data) || [];
+  const flats = useSelector((state) => state.flat.flats || []);
+  const services = useSelector((state) => state.serviceMasters.services) || [];
+  const cred = useSelector((state) => state.Cred);
 
   const [showModal, setShowModal] = useState(false); // For first modal
-  const [showModal1, setShowModal1] = useState(false); // For second modal
-  const [newBill, setNewBill] = useState({ stateId: '', siteId: '', flatId: '', serviceId: '' });
-  const [billList, setBillList] = useState([]);
+  const [showSecondModal, setShowSecondModal] = useState(false); // For second modal
+  const [newBill, setNewBill] = useState({
+    stateId: '',
+    siteId: '',
+    serviceId: '',
+  });
+  const [addedEntries, setAddedEntries] = useState([]);
+  const [newBillSecond, setNewBillSecond] = useState({
+    stateId: '',
+    siteId: '',
+    flatId: '',
+    serviceId: '',
+  });
+
   const [pendingBills, setPendingBills] = useState([]);
   const [paidBills, setPaidBills] = useState([]);
 
@@ -49,7 +71,7 @@ const BillManager = () => {
 
   useEffect(() => {
     fetchServices();
-  }, [showModal, showModal1]);
+  }, [showModal, showSecondModal]);
 
   const fetchServices = async () => {
     try {
@@ -59,6 +81,12 @@ const BillManager = () => {
       dispatch(setError('Failed to load services.'));
     }
   };
+
+  useEffect(() => {
+    if (newBill.stateId) {
+      fetchSites(newBill.stateId);
+    }
+  }, [newBill.stateId, newBillSecond.siteId]);
 
   const fetchSites = async (stateId) => {
     dispatch(setLoading(true));
@@ -73,16 +101,23 @@ const BillManager = () => {
   };
 
   useEffect(() => {
-    if (newBill.stateId) {
-      fetchSites(newBill.stateId);
+    if (newBill.siteId && newBill.stateId) {
+      fetchFlats(newBill.stateId, newBill.siteId);  // Fix the parameter here
+      fetchPendingBills(newBill.siteId);
+      fetchPaidBills(newBill.siteId);
     }
-  }, [newBill.stateId]);
+  }, [newBill.siteId, newBill.stateId]);
+
 
   const fetchFlats = async (stateId, siteId) => {
     dispatch(setLoading(true));
     try {
       const response = await getFlatsBySiteAndState(siteId, stateId, cred.id);
-      dispatch(setFlats({ flats: response.content, totalElement: response.totalElement, page: response.page }));
+      dispatch(setFlats({
+        flats: response.content,
+        totalElement: response.totalElement,
+        page: response.page,
+      }));
     } catch (err) {
       dispatch(setError('Failed to load flats.'));
     } finally {
@@ -111,31 +146,45 @@ const BillManager = () => {
   const openModal = () => setShowModal(true);
   const closeModal = () => {
     setShowModal(false);
-    setNewBill({ stateId: '', siteId: '', serviceId: '' });
+    setNewBill({
+      stateId: '',
+      siteId: '',
+      serviceId: '',
+    });
   };
 
-  const openModal1 = () => setShowModal1(true);
-  const closeModal1 = () => {
-    setShowModal1(false);
-    setNewBill({ stateId: '', siteId: '', flatId: '', serviceId: '' });
+  const openSecondModal = () => setShowSecondModal(true);
+  const closeSecondModal = () => {
+    setShowSecondModal(false);
+    setNewBillSecond({
+      stateId: '',
+      siteId: '',
+      flatId: '',
+      serviceId: '',
+    });
   };
+
+  // const openSecondModal = () => setShowSecondModal(true);
+  // const closeSecondModal = () => {
+  //   setShowSecondModal(false);
+  // };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setNewBill({ ...newBill, [name]: type === 'checkbox' ? checked : (value ? Number(value) : '') });
-  };
-
-  const handleAddBill = (e) => {
-    e.preventDefault();
-    setBillList([...billList, newBill]);
-    setNewBill({ stateId: '', siteId: '', flatId: '', serviceId: '' });
+    setNewBill({
+      ...newBill,
+      [name]: type === 'checkbox' ? checked : (value ? Number(value) : ''),
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     dispatch(setLoading(true));
     try {
-      const response = await createBillsInBulkWithoutFlatId({ ...newBill, builderId: cred.id });
+      const response = await createBillsInBulkWithoutFlatId({
+        ...newBill,
+        builderId: cred.id,
+      });
       dispatch(addBill(response.data));
       closeModal();
     } catch (err) {
@@ -148,25 +197,31 @@ const BillManager = () => {
   const handleDeleteBill = async (id) => {
     try {
       await apiDeleteBill(id);
-      dispatch(setBills(bills.filter(bill => bill.id !== id)));
+      dispatch(setBills(bills.filter((bill) => bill.id !== id)));
     } catch (err) {
       dispatch(setError('Failed to delete bill.'));
     }
   };
 
+  // Handle Mark as Paid action
   const handleMarkAsPaid = async (id) => {
     try {
       await markBillAsPaid(id);
-      dispatch(setBills(bills.map(bill => (bill.id === id ? { ...bill, paid: true } : bill))));
+      dispatch(setBills(bills.map((bill) =>
+        bill.id === id ? { ...bill, paid: true } : bill
+      )));
     } catch (err) {
       dispatch(setError('Failed to mark bill as paid.'));
     }
   };
 
+  // Handle Mark as Unpaid action
   const handleMarkAsUnpaid = async (id) => {
     try {
       await markBillAsUnpaid(id);
-      dispatch(setBills(bills.map(bill => (bill.id === id ? { ...bill, paid: false } : bill))));
+      dispatch(setBills(bills.map((bill) =>
+        bill.id === id ? { ...bill, paid: false } : bill
+      )));
     } catch (err) {
       dispatch(setError('Failed to mark bill as unpaid.'));
     }
@@ -176,14 +231,26 @@ const BillManager = () => {
     const date = new Date(dateString);
     return date.toLocaleDateString();
   };
+  const handleAddEntry = () => {
+    setAddedEntries([...addedEntries, newBill]);
+    setNewBill({ stateId: "", siteId: "", flatId: "", serviceId: "", quantity: 1 });
+  };
+  const handleRemoveEntry = (index) => {
+    setAddedEntries(addedEntries.filter((_, i) => i !== index));
+  };
 
+  
   return (
     <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-white text-4xl">Bill Manager</h2>
         <div className="flex gap-4">
-          <Button variant="primary" onClick={openModal}>Add Bill in Bulk</Button>
-          <Button variant="secondary" onClick={openModal1}>Add Bill or Flats</Button>
+          <Button variant="primary" onClick={openModal}>
+            Add Bill in Bulk
+          </Button>
+          <Button variant="secondary" onClick={openSecondModal}>
+            Add Bill or Flats
+          </Button>
         </div>
       </div>
       {loading && <p className="text-white">Loading...</p>}
@@ -223,19 +290,33 @@ const BillManager = () => {
                 <td>{bill.serviceName}</td>
                 <td>{bill.area}</td>
                 <td>{bill.ownerEmail}</td>
-                <td>{bill.amountBeforeGST}</td>
+                <td>{bill.amountBeforeGst}</td>
                 <td>{bill.sgstAmount}</td>
                 <td>{bill.cgstAmount}</td>
                 <td>{bill.igstAmount}</td>
-                <td>{bill.amountAfterGST}</td>
+                <td>{bill.amountAfterGst}</td>
                 <td>{bill.paid ? 'Paid' : 'Unpaid'}</td>
                 <td>
-                  <Button variant="danger" onClick={() => handleDeleteBill(bill.id)}>Delete</Button>
-                  {bill.paid ? (
-                    <Button variant="warning" onClick={() => handleMarkAsUnpaid(bill.id)}>Mark as Unpaid</Button>
-                  ) : (
-                    <Button variant="success" onClick={() => handleMarkAsPaid(bill.id)}>Mark as Paid</Button>
-                  )}
+                  <Button
+                    variant="success"
+                    onClick={() => handleMarkAsPaid(bill.id)}
+                    disabled={bill.paid}
+                  >
+                    Mark as Paid
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => handleMarkAsUnpaid(bill.id)}
+                    disabled={!bill.paid}
+                  >
+                    Mark as Unpaid
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDeleteBill(bill.id)}
+                  >
+                    Delete
+                  </Button>
                 </td>
               </tr>
             ))}
@@ -243,159 +324,139 @@ const BillManager = () => {
         </Table>
       </div>
 
-      {/* Modal 1 */}
+      {/* Modal for Adding Bulk Bills */}
       <Modal show={showModal} onHide={closeModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Add Bill in Bulk</Modal.Title>
+          <Modal.Title>Bulk Bill Creation</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3" controlId="stateId">
-              <Form.Label>Select State</Form.Label>
-              <Form.Control as="select" name="stateId" value={newBill.stateId} onChange={handleInputChange}>
-                <option value="">Select State</option>
-                {stateMasters.map(state => (
-                  <option key={state.id} value={state.id}>{state.name}</option>
+            <Form.Group controlId="stateId">
+              <Form.Label>State</Form.Label>
+              <Form.Control as="select" name="stateId" onChange={handleInputChange}>
+                <option value="">Select a State</option>
+                {stateMasters.map((state) => (
+                  <option key={state.id} value={state.id}>
+                    {state.name}
+                  </option>
                 ))}
               </Form.Control>
             </Form.Group>
-            
-              <Form.Group className="mb-3" controlId="siteId">
-                <Form.Label>Select Site</Form.Label>
-                <Form.Control as="select" name="siteId" value={newBill.siteId} onChange={handleInputChange}>
-                  <option value="">Select Site</option>
-                  {siteMasters.map(site => (
-                    <option key={site.id} value={site.id}>{site.name}</option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
-          
-          
-              <Form.Group className="mb-3" controlId="serviceId">
-                <Form.Label>Select Service</Form.Label>
-                <Form.Control as="select" name="serviceId" value={newBill.serviceId} onChange={handleInputChange}>
-                  <option value="">Select Service</option>
-                  {services.map(service => (
-                    <option key={service.id} value={service.id}>{service.name}</option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
-       
-            <Button variant="primary" type="submit">Create Bill</Button>
+            <Form.Group controlId="siteId">
+              <Form.Label>Site</Form.Label>
+              <Form.Control as="select" name="siteId" onChange={handleInputChange}>
+                <option value="">Select a Site</option>
+                {siteMasters.map((site) => (
+                  <option key={site.id} value={site.id}>
+                    {site.name}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="serviceId">
+              <Form.Label>Service</Form.Label>
+              <Form.Control as="select" name="serviceId" onChange={handleInputChange}>
+                <option value="">Select a Service</option>
+                {services.map((service) => (
+                  <option key={service.id} value={service.id}>
+                    {service.name}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+            <Button variant="primary" type="submit">Create Bills</Button>
           </Form>
         </Modal.Body>
       </Modal>
 
-      {/* Modal 2 */}
-      <Modal show={showModal1} onHide={closeModal1}>
+      {/* Modal for Second Action */}
+      <Modal show={showSecondModal} onHide={closeSecondModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Add Bill or Flats</Modal.Title>
+          <Modal.Title>Second Modal</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        <form onSubmit={handleAddBill}>
-            {/* State Selection */}
-            <div className="mb-3">
-              <label htmlFor="stateId" className="form-label">Select State</label>
-              <select
-                id="stateId"
-                name="stateId"
-                value={newBill.stateId}
-                onChange={handleInputChange}
-                className="form-control"
-                required
-              >
-                <option value="">Select State</option>
+          <Form onSubmit={handleSubmit}>
+            <Form.Group controlId="stateId">
+              <Form.Label>State</Form.Label>
+              <Form.Control as="select" name="stateId" onChange={handleInputChange}>
+                <option value="">Select a State</option>
                 {stateMasters.map((state) => (
-                  <option key={state.id} value={state.id}>{state.name}</option>
+                  <option key={state.id} value={state.id}>
+                    {state.name}
+                  </option>
                 ))}
-              </select>
-            </div>
-
-            {/* Site Selection */}
-            <div className="mb-3">
-              <label htmlFor="siteId" className="form-label">Select Site</label>
-              <select
-                id="siteId"
-                name="siteId"
-                value={newBill.siteId}
-                onChange={handleInputChange}
-                className="form-control"
-                required
-              >
-                <option value="">Select Site</option>
+              </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="siteId">
+              <Form.Label>Site</Form.Label>
+              <Form.Control as="select" name="siteId" onChange={handleInputChange}>
+                <option value="">Select a Site</option>
                 {siteMasters.map((site) => (
-                  <option key={site.id} value={site.id}>{site.name}</option>
+                  <option key={site.id} value={site.id}>
+                    {site.name}
+                  </option>
                 ))}
-              </select>
-            </div>
+              </Form.Control>
+            </Form.Group>
 
-            {/* Flat Selection */}
-            <div className="mb-3">
-              <label htmlFor="flatId" className="form-label">Select Flat</label>
-              <select
-                id="flatId"
-                name="flatId"
-                value={newBill.flatId}
-                onChange={handleInputChange}
-                className="form-control"
-                required
-              >
-                <option value="">Select Flat</option>
+            <Form.Group controlId="flatId">
+              <Form.Label>Flats</Form.Label>
+              <Form.Control as="select" name="flatId" onChange={handleInputChange}>
+                <option value="">Select a Flat</option>
                 {flats.map((flat) => (
-                  <option key={flat.id} value={flat.id}>{flat.name}</option>
+                  <option key={flat.id} value={flat.id}>
+                    {flat.flatNo} {/* or any other property that represents the flat */}
+                  </option>
                 ))}
-              </select>
-            </div>
-
-            {/* Service Selection */}
-            <div className="mb-3">
-              <label htmlFor="serviceId" className="form-label">Select Service</label>
-              <select
-                id="serviceId"
-                name="serviceId"
-                value={newBill.serviceId}
-                onChange={handleInputChange}
-                className="form-control"
-                required
-              >
-                <option value="">Select Service</option>
+              </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="serviceId">
+              <Form.Label>Service</Form.Label>
+              <Form.Control as="select" name="serviceId" onChange={handleInputChange}>
+                <option value="">Select a Service</option>
                 {services.map((service) => (
-                  <option key={service.id} value={service.id}>{service.name}</option>
+                  <option key={service.id} value={service.id}>
+                    {service.name}
+                  </option>
                 ))}
-              </select>
-            </div>
-
-            <div className="d-flex justify-content-end">
-              <Button variant="primary" type="submit">Add Bill</Button>
-            </div>
-          </form>
-
-          {/* Table to Display Added Bills */}
-          <div className="mt-4">
-            <h5>Added Bills</h5>
-            <table className="table table-bordered">
-              <thead>
-                <tr>
-                  <th>State</th>
-                  <th>Site</th>
-                  <th>Flat</th>
-                  <th>Service</th>
-                </tr>
-              </thead>
-              <tbody>
-                {billList.map((bill, index) => (
-                  <tr key={index}>
-                    <td>{stateMasters.find(state => state.id === bill.stateId)?.name}</td>
-                    <td>{siteMasters.find(site => site.id === bill.siteId)?.name}</td>
-                    <td>{flats.find(flat => flat.id === bill.flatId)?.name}</td>
-                    <td>{services.find(service => service.id === bill.serviceId)?.name}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+              </Form.Control>
+            </Form.Group>
+            <div className="d-flex justify-content-end m-t-5">
+            <Button
+              variant="primary"
+              onClick={handleAddEntry}
+              className="align-self-end flex items-center gap-2"
+            >
+              Add
+            </Button>
           </div>
+          <Table striped bordered hover size="sm">
+      <thead>
+        <tr>
+          <th>state</th>
+          <th>site</th>
+          <th>flat</th>
+          <th>service</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+              {addedEntries.map((entry, index) => (
+                <tr key={index}>
+                  <td>{entry.stateId}</td>
+                  <td>{entry.siteId}</td>
+                  <td>{entry.flatId || "N/A"}</td>
+                  <td>{entry.serviceId}</td>
+                  <td><Button variant="danger" onClick={() => handleRemoveEntry(index)}>Remove</Button></td>
+                </tr>
+              ))}
+            </tbody>
+    </Table>
+            <Button variant="primary" type="submit">Create Bills</Button>
+          </Form>
         </Modal.Body>
       </Modal>
+
     </div>
   );
 };
