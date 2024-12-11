@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Button, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 import { setServiceMasters, setLoading, setError } from '../redux/Features/ServiceSlice';
-import { createServiceMaster, updateServiceMaster, getAllServiceMasters } from '../Api/ServicesApi/ServiceApi';
+import { createServiceMaster, updateServiceMaster, getAllServiceMasters, deleteService } from '../Api/ServicesApi/ServiceApi';
 
 const ServiceMaster = () => {
   const dispatch = useDispatch();
@@ -15,10 +15,11 @@ const ServiceMaster = () => {
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [serviceId, setServiceId] = useState(null);
-
+  const cred = useSelector(state => state.Cred);
+  
   const [newService, setNewService] = useState({
     name: '',
-    saccode: '', // Updated field name
+    saccode: '',
     cgst: '',
     sgst: '',
     igst: '',
@@ -27,7 +28,7 @@ const ServiceMaster = () => {
   const fetchServiceMasters = async () => {
     dispatch(setLoading(true));
     try {
-      const response = await getAllServiceMasters();
+      const response = await getAllServiceMasters(cred.id);
       console.log("API Response:", response.data);
       dispatch(setServiceMasters(response.data));
     } catch (err) {
@@ -47,7 +48,7 @@ const ServiceMaster = () => {
       if (serviceToEdit) {
         setNewService({
           name: serviceToEdit.name,
-          saccode: serviceToEdit.saccode || '', // Updated field name
+          saccode: serviceToEdit.saccode || '',
           cgst: serviceToEdit.cgst,
           sgst: serviceToEdit.sgst,
           igst: serviceToEdit.igst,
@@ -67,7 +68,7 @@ const ServiceMaster = () => {
   const handleCreate = async () => {
     dispatch(setLoading(true));
     try {
-      await createServiceMaster(newService);
+      await createServiceMaster({...newService, builderId: cred.id});
       fetchServiceMasters();
       setShowModal(false);
       resetForm();
@@ -81,12 +82,24 @@ const ServiceMaster = () => {
   const handleUpdate = async () => {
     dispatch(setLoading(true));
     try {
-      await updateServiceMaster(serviceId, newService);
+      await updateServiceMaster(serviceId, newService, {...newService, builderId: cred.id});
       fetchServiceMasters();
       setShowModal(false);
       resetForm();
     } catch (err) {
       dispatch(setError(err.message || 'Failed to update service.'));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const handleDelete = async (id) => {
+    dispatch(setLoading(true));
+    try {
+      await deleteService(id);
+      fetchServiceMasters(); // Re-fetch services to reflect deletion
+    } catch (err) {
+      dispatch(setError(err.message || 'Failed to delete service.'));
     } finally {
       dispatch(setLoading(false));
     }
@@ -135,7 +148,7 @@ const ServiceMaster = () => {
               <tr key={service.id}>
                 <td>{service.id}</td>
                 <td>{service.name}</td>
-                <td>{service.saccode || 'N/A'}</td> {/* Updated field name */}
+                <td>{service.saccode || 'N/A'}</td>
                 <td>{service.cgst}%</td>
                 <td>{service.sgst}%</td>
                 <td>{service.igst}%</td>
@@ -150,6 +163,18 @@ const ServiceMaster = () => {
                       onClick={() => handleEdit(service)}
                     >
                       <FaEdit size={30} />
+                    </Button>
+                  </OverlayTrigger>
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={<Tooltip>Delete</Tooltip>}
+                  >
+                    <Button
+                      variant="link"
+                      className="p-0 text-danger"
+                      onClick={() => handleDelete(service.id)}
+                    >
+                      <FaTrash size={30} />
                     </Button>
                   </OverlayTrigger>
                 </td>

@@ -30,10 +30,20 @@ export const getServiceMaster = (id) =>
     },
   });
 
-export const getAllServiceMasters = () =>
-  axios.get(`${ baseUrl}/all`, {
+export const getAllServiceMasters = (builderId) =>
+  axios.get(`${ baseUrl}/all/${builderId}`, {
     headers: {
       Accept: '*/*',
       'Content-Type': 'application/json',
     },
   });
+
+
+  export const deleteService = async (id) => {
+    await axios.delete(`${baseUrl}/delete/${id}`, {
+      headers: {
+        'accept': '*/*',
+        'Content-Type': 'application/json',
+      },
+    });
+  };
