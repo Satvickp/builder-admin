@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Table, Button, Modal, Form, Pagination } from "react-bootstrap";
+import { Table, Button, Modal, Form, Pagination, FormGroup } from "react-bootstrap";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -84,7 +84,13 @@ const SiteMaster = () => {
   const handleCreate = async () => {
     dispatch(setLoading());
     try {
-      await createSiteMaster({ ...newSite, builderId: cred.id });
+
+      await createSiteMaster({
+        ...newSite,
+        builderId: cred.id,
+        totalUnits: Number(newSite.totalUnits),
+        stateMasterId: Number(newSite.stateMasterId),
+      });
       fetchSites();
       setShowModal(false);
       setNewSite({
@@ -98,10 +104,17 @@ const SiteMaster = () => {
     }
   };
 
+
   const handleUpdate = async () => {
     dispatch(setLoading());
     try {
-      await updateSiteMaster(siteId, { ...newSite, builderId: cred.id });
+
+      await updateSiteMaster(siteId, {
+        ...newSite,
+        builderId: cred.id,
+        totalUnits: Number(newSite.totalUnits),
+        stateMasterId: Number(newSite.stateMasterId),
+      });
       fetchSites();
       setShowModal(false);
       setNewSite({
@@ -267,39 +280,48 @@ const SiteMaster = () => {
                   </option>
                 ))}
               </Form.Control>
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Site Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="name"
-                value={newSite.name}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Total Units</Form.Label>
-              <Form.Control
-                type="number"
-                name="totalUnits"
-                value={newSite.totalUnits}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Flat Types</Form.Label>
-              <Form.Control
-                type="text"
-                name="flatTypes"
-                value={newSite.flatTypes.join(", ")}
-                onChange={(e) =>
-                  setNewSite({ ...newSite, flatTypes: e.target.value.split(", ") })
-                }
-                placeholder="e.g., 1BHK, 2BHK, 3BHK"
-              />
-            </Form.Group>
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Site Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="name"
+                  value={newSite.name}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group>
+                <Form.Label>Total Units</Form.Label>
+                <Form.Control
+                  type="number"
+                  name="totalUnits"
+                  value={newSite.totalUnits}
+                  onChange={(e) => {
+                    setNewSite({ ...newSite, totalUnits: e.target.value });
+                  }}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group>
+                <Form.Label>Flat Types</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="flatTypes"
+                  value={newSite.flatTypes.join(", ")}
+                  onChange={(e) =>
+                    setNewSite({
+                      ...newSite,
+                      flatTypes: e.target.value.split(",").map((item) => item.trim())
+                    })
+                  }
+                  placeholder="e.g., 1000, 2000, 5000"
+                />
+              </Form.Group>
+
+
           </Form>
         </Modal.Body>
         <Modal.Footer>
