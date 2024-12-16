@@ -6,12 +6,16 @@ import { BASE_URL } from "../../utils/BaseUrl"
 
 
 const baseUrl =  `${BASE_URL.DEV_URL}/bill-generator-service/state-masters`
+const token = window.localStorage.getItem('USER_TOKEN')
+console.log('token',token);
 
-export const getStates = async () => {
-  const response = await axios.get(`${baseUrl}/all`, {
+
+export const getStates = async (builderId) => {
+  const response = await axios.get(`${baseUrl}/all/${builderId}`, {
     headers: {
       'accept': '*/*',
       'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
     },
   });
   return response.data;
@@ -22,6 +26,7 @@ export const createState = async (newState) => {
     headers: {
       'accept': '*/*',
       'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
     },
   });
   return response.data;
@@ -32,16 +37,18 @@ export const updateState = async (code, updatedState) => {
     headers: {
       'accept': '*/*',
       'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
     },
   });
   return response.data;
 };
 
-export const deleteState = async (code) => {
-  await axios.delete(`${baseUrl}/delete/${code}`, {
+export const deleteState = async (id) => {
+  await axios.delete(`${baseUrl}/delete/${id}`, {
     headers: {
       'accept': '*/*',
       'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
     },
   });
 };

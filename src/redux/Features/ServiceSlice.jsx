@@ -10,6 +10,7 @@ const serviceSlice = createSlice({
   },
   reducers: {
     setServiceMasters(state, action) {
+      console.log(action.payload)
       state.services = action.payload;
     },
     setLoading(state, action) {

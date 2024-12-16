@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Modal, OverlayTrigger, Tooltip } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useDispatch, useSelector } from "react-redux";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import {
   setStateMasters,
   addStateMaster,
@@ -12,6 +12,7 @@ import {
   selectStateMasters,
 } from "../redux/Features/stateMasterSlice";
 import { getStates, createState, updateState } from "../Api/stateapi/stateMasterApi";
+import { deleteState } from "../Api/stateapi/stateMasterApi";  // Import the deleteState function
 
 function States() {
   const dispatch = useDispatch();
@@ -20,6 +21,7 @@ function States() {
   const [isEdit, setIsEdit] = useState(false);
   const [currentState, setCurrentState] = useState(null);
   const [error, setErrorState] = useState("");
+  const cred = useSelector(state => state.Cred);
 
   const [newState, setNewState] = useState({
     name: "",
@@ -88,7 +90,7 @@ function States() {
         console.log("Updated state:", updatedState); // Debug API response
         dispatch(updateStateMaster(updatedState));
       } else {
-        const createdState = await createState(newState);
+        const createdState = await createState({ ...newState, builderId: cred.id });
         console.log("Created state:", createdState); // Debug API response
         dispatch(addStateMaster(createdState));
       }
@@ -117,12 +119,23 @@ function States() {
     handleShow();
   };
 
-  
+  // Function to handle state deletion
+  const handleDelete = async (stateCode) => {
+    if (window.confirm("Are you sure you want to delete this state?")) {
+      try {
+        await deleteState(stateCode); // Call deleteState API
+        await fetchStateMasters(); // Refresh state data
+      } catch (error) {
+        console.error("Error deleting state:", error.message || error);
+        setErrorState("Failed to delete state.");
+      }
+    }
+  };
 
   const fetchStateMasters = async () => {
     dispatch(setLoading("loading"));
     try {
-      const states = await getStates();
+      const states = await getStates(cred.id);
       dispatch(setStateMasters(states));
       dispatch(setLoading("succeeded"));
     } catch (error) {
@@ -137,57 +150,71 @@ function States() {
   }, [dispatch]);
 
   return (
-    <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <div className="w-1/3">
-          <h1 className="text-white ml-4 text-4xl">States</h1>
+    <div className="container-fluid bg-slate-700 pt-20 px-1" >
+      <div className="row align-items-center mb-4">
+        <div className="col-md-6 col-12">
+          <h1 className="text-white text-4xl">States</h1>
         </div>
-        <div className="w-36 flex justify-end">
-          <Button variant="primary" className="w-80" onClick={handleShow}>
+        <div className="col-md-6 col-12 text-md-end text-sm-start mt-2 mt-md-0">
+          <Button variant="primary" onClick={handleShow}>
             Add New
           </Button>
         </div>
       </div>
 
-      <Table striped bordered hover className="w-full">
-        <thead>
-          <tr>
-            <th>State</th>
-            <th>Code</th>
-            <th>Monthly Charges Type</th>
-            <th>Monthly Charges</th>
-            <th>Origin</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {stateMasters.map((stateMaster) => (
-            <tr key={stateMaster.code}>
-              <td>{stateMaster.name}</td>
-              <td>{stateMaster.code}</td>
-              <td>{stateMaster.monthlyChargesType}</td>
-              <td>{stateMaster.monthlyCharges}</td>
-              <td>{String(stateMaster.origin) || "N/A"}</td>
-              <td>
-                <OverlayTrigger
-                  placement="top"
-                  overlay={<Tooltip>Edit</Tooltip>}
-                >
-                  <Button
-                    variant="link"
-                    className="p-0 text-primary"
-                    onClick={() => handleEdit(stateMaster)}
-                  >
-                    <FaEdit size={20} />
-                  </Button>
-                </OverlayTrigger>
-              </td>
+      <div className="table-responsive">
+        <Table striped bordered hover>
+          <thead>
+            <tr>
+              <th>State</th>
+              <th>Code</th>
+              <th>Monthly Charges Type</th>
+              <th>Monthly Charges</th>
+              <th>Origin</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {stateMasters.map((stateMaster) => (
+              <tr key={stateMaster.id}>
+                <td>{stateMaster.name}</td>
+                <td>{stateMaster.code}</td>
+                <td>{stateMaster.monthlyChargesType}</td>
+                <td>{stateMaster.monthlyCharges}</td>
+                <td>{String(stateMaster.origin) || "N/A"}</td>
+                <td>
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={<Tooltip>Edit</Tooltip>}
+                  >
+                    <Button
+                      variant="link"
+                      className="p-0 text-primary"
+                      onClick={() => handleEdit(stateMaster)}
+                    >
+                      <FaEdit size={20} />
+                    </Button>
+                  </OverlayTrigger>
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={<Tooltip>Delete</Tooltip>}
+                  >
+                    <Button
+                      variant="link"
+                      className="p-0 text-danger"
+                      onClick={() => handleDelete(stateMaster.id)}
+                    >
+                      <FaTrash size={20} />
+                    </Button>
+                  </OverlayTrigger>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
 
-      <Modal show={show} onHide={handleClose} className="mt-40">
+      <Modal show={show} onHide={handleClose} className="mt-4">
         <Modal.Header closeButton>
           <Modal.Title>{isEdit ? "Edit State Master" : "Add State Master"}</Modal.Title>
         </Modal.Header>
@@ -252,8 +279,8 @@ function States() {
                 required
               >
                 <option value="">Select Type</option>
-                <option value="yes">yes</option>
-                <option value="no">no</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
               </select>
             </div>
             <Button variant="primary" type="submit">
@@ -263,13 +290,11 @@ function States() {
         </Modal.Body>
       </Modal>
     </div>
+
   );
 }
 
 export default States;
-
-
-
 
 
 
