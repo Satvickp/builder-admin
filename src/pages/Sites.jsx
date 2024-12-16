@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Table, Button, Modal, Form, Pagination, FormGroup } from "react-bootstrap";
+import { Table, Button, Modal, Form, Pagination, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {
   setSiteMasters,
@@ -16,7 +15,6 @@ import {
   getAllSiteMasters,
   deleteSite,
 } from "../Api/SiteApi/SiteApi";
-import { setStateMasters } from "../redux/Features/stateMasterSlice";
 
 const SiteMaster = () => {
   const dispatch = useDispatch();
@@ -33,8 +31,10 @@ const SiteMaster = () => {
     name: "",
     totalUnits: "",
     flatTypes: [],
-    stateMasterId: 1,
+    blockList: [],
+    stateMasterId: null,
   });
+
   const [pagination, setPagination] = useState({
     page: 0,
     pageSize: 10,
@@ -43,7 +43,7 @@ const SiteMaster = () => {
     sortDirection: "desc",
   });
 
-  // Fetch sites with pagination and sorting
+
   const fetchSites = async () => {
     try {
       dispatch(setLoading());
@@ -64,6 +64,7 @@ const SiteMaster = () => {
     }
   };
 
+
   const handleStateSelect = (id) => {
     setStateId(id);
     setNewSite({
@@ -71,6 +72,7 @@ const SiteMaster = () => {
       stateMasterId: id,
     });
   };
+
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -81,10 +83,10 @@ const SiteMaster = () => {
     setNewSite({ ...newSite, [name]: value });
   };
 
+
   const handleCreate = async () => {
     dispatch(setLoading());
     try {
-
       await createSiteMaster({
         ...newSite,
         builderId: cred.id,
@@ -93,12 +95,7 @@ const SiteMaster = () => {
       });
       fetchSites();
       setShowModal(false);
-      setNewSite({
-        name: "",
-        totalUnits: "",
-        flatTypes: [],
-        stateMasterId: stateId || 1,
-      });
+      resetForm();
     } catch (err) {
       dispatch(setError(err.message));
     }
@@ -108,7 +105,6 @@ const SiteMaster = () => {
   const handleUpdate = async () => {
     dispatch(setLoading());
     try {
-
       await updateSiteMaster(siteId, {
         ...newSite,
         builderId: cred.id,
@@ -117,26 +113,24 @@ const SiteMaster = () => {
       });
       fetchSites();
       setShowModal(false);
-      setNewSite({
-        name: "",
-        totalUnits: "",
-        flatTypes: [],
-        stateMasterId: stateId || 1,
-      });
+      resetForm();
     } catch (err) {
       dispatch(setError(err.message));
     }
   };
+
 
   const handleEdit = (site) => {
     setNewSite({
       ...site,
       stateMasterId: site.stateMasterId,
     });
+    setStateId(site.stateMasterId);
     setSiteId(site.id);
     setIsEdit(true);
     setShowModal(true);
   };
+
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this site?")) {
@@ -151,9 +145,34 @@ const SiteMaster = () => {
     }
   };
 
+
   const handlePageChange = (pageNumber) => {
     setPagination((prev) => ({ ...prev, page: pageNumber }));
   };
+
+  const resetForm = () => {
+    setNewSite({
+      name: "",
+      totalUnits: "",
+      flatTypes: [],
+      blockList: [],
+      stateMasterId: null,
+    });
+    setStateId(null);
+    setIsEdit(false);
+  };
+
+
+  useEffect(() => {
+    if (!stateId && stateMasters.length > 0) {
+      const defaultStateId = stateMasters[0].id; // Default to the first state's ID
+      setStateId(defaultStateId);
+      setNewSite((prev) => ({
+        ...prev,
+        stateMasterId: defaultStateId,
+      }));
+    }
+  }, [stateMasters, showModal]);
 
   useEffect(() => {
     fetchSites();
@@ -161,76 +180,86 @@ const SiteMaster = () => {
 
   const filteredStateMasters = stateMasters.filter((state) =>
     state.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  )
 
   return (
-    <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-white text-4xl">Site Master</h1>
-        <Button variant="primary" onClick={() => setShowModal(true)}>
-          Add New
-        </Button>
+
+    <div className="container-fluid bg-slate-700 pt-20 px-2.8">
+      <div className="row align-items-center mb-4">
+        <div className="col-md-6 col-12">
+          <h1 className="text-white text-4xl">Site Master</h1>
+        </div>
+        <div className="col-md-6 col-12 text-md-end text-sm-start mt-2 mt-md-0">
+          <Button variant="primary" onClick={() => setShowModal(true)}>
+            Add New
+          </Button>
+        </div>
+
       </div>
 
-      {status === "loading" && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>Error: {error}</p>}
+      {status === "loading" && <p className="text-white">Loading...</p>}
+      {error && <p className="text-danger">Error: {error}</p>}
 
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Site</th>
-            <th>Total Units</th>
-            <th>Flat Types</th>
-            <th>State</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.length > 0 ? (
-            data.map((site) => (
-              <tr key={site.id}>
-                <td>{site.name}</td>
-                <td>{site.totalUnits}</td>
-                <td>{site.flatTypes.join(", ")}</td>
-                <td>
-                  {
-                    stateMasters.find((state) => state.id === site.stateMasterId)
-                      ?.name || "Unknown"
-                  }
-                </td>
-                <td>
-                  <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
-                    <Button
-                      variant="link"
-                      className="p-0 text-primary"
-                      onClick={() => handleEdit(site)}
-                    >
-                      <FaEdit />
-                    </Button>
-                  </OverlayTrigger>
-                  <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
-                    <Button
-                      variant="link"
-                      className="p-0 text-danger"
-                      onClick={() => handleDelete(site.id)}
-                    >
-                      <FaTrash />
-                    </Button>
-                  </OverlayTrigger>
+      <div className="table-responsive">
+        <Table striped bordered hover>
+          <thead>
+            <tr>
+              <th>Site</th>
+              <th>Total Units</th>
+              <th>Flat Types</th>
+              <th>Block List</th>
+              <th>State</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.length > 0 ? (
+              data.map((site) => (
+                <tr key={site.id}>
+                  <td>{site.name}</td>
+                  <td>{site.totalUnits}</td>
+                  <td>{site.flatTypes.join(", ")}</td>
+                  <td>{site.blockList.join(" ,")}</td>
+                  <td>
+                    {
+                      stateMasters.find((state) => state.id === site.stateMasterId)
+                        ?.name || "Unknown"
+                    }
+                  </td>
+                  <td>
+                    <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
+                      <Button
+                        variant="link"
+                        className="p-0 text-primary"
+                        onClick={() => handleEdit(site)}
+                      >
+                        <FaEdit />
+                      </Button>
+                    </OverlayTrigger>
+                    <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
+                      <Button
+                        variant="link"
+                        className="p-0 text-danger"
+                        onClick={() => handleDelete(site.id)}
+                      >
+                        <FaTrash />
+                      </Button>
+                    </OverlayTrigger>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="text-center">
+                  No data found
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5" className="text-center">
-                No data found
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </Table>
+            )}
+          </tbody>
+        </Table>
+      </div>
 
-      <Pagination className="mt-3">
+      <Pagination className="mt-3 justify-content-center">
         <Pagination.First
           onClick={() => handlePageChange(0)}
           disabled={pagination.page === 0}
@@ -280,47 +309,60 @@ const SiteMaster = () => {
                   </option>
                 ))}
               </Form.Control>
-              </Form.Group>
-              <Form.Group>
-                <Form.Label>Site Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="name"
-                  value={newSite.name}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Site Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                value={newSite.name}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Total Units</Form.Label>
+              <Form.Control
+                type="number"
+                name="totalUnits"
+                value={newSite.totalUnits}
+                onChange={(e) => {
+                  setNewSite({ ...newSite, totalUnits: e.target.value });
+                }}
+                required
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Flat Types</Form.Label>
+              <Form.Control
+                type="text"
+                name="flatTypes"
+                value={newSite.flatTypes.join(", ")}
+                onChange={(e) =>
+                  setNewSite({
+                    ...newSite,
+                    flatTypes: e.target.value.split(",").map((item) => item.trim()),
+                  })
+                }
+                placeholder="e.g., 1000, 2000, 5000"
+              />
+            </Form.Group>
 
-              <Form.Group>
-                <Form.Label>Total Units</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="totalUnits"
-                  value={newSite.totalUnits}
-                  onChange={(e) => {
-                    setNewSite({ ...newSite, totalUnits: e.target.value });
-                  }}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group>
-                <Form.Label>Flat Types</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="flatTypes"
-                  value={newSite.flatTypes.join(", ")}
-                  onChange={(e) =>
-                    setNewSite({
-                      ...newSite,
-                      flatTypes: e.target.value.split(",").map((item) => item.trim())
-                    })
-                  }
-                  placeholder="e.g., 1000, 2000, 5000"
-                />
-              </Form.Group>
-
+            <Form.Group>
+              <Form.Label>blockList</Form.Label>
+              <Form.Control
+                type="text"
+                name="blockList"
+                value={newSite.blockList.join(", ")}
+                onChange={(e) =>
+                  setNewSite({
+                    ...newSite,
+                    blockList: e.target.value.split(",").map((item) => item.trim()),
+                  })
+                }
+                placeholder="e.g., A, B, C"
+              />
+            </Form.Group>
 
           </Form>
         </Modal.Body>
@@ -338,13 +380,11 @@ const SiteMaster = () => {
       </Modal>
     </div>
   );
+
+
 };
 
 export default SiteMaster;
-
-
-
-
 
 
 

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {
   addBill,
@@ -15,6 +17,7 @@ import {
   markBillAsPaid,
   markBillAsUnpaid,
 } from '../Api/BillApi/BillApi';
+import { sendBillInBulk } from '../Api/BillApi/BillApi';
 import { getStates } from '../Api/stateapi/stateMasterApi';
 import { setStateMasters } from '../redux/Features/stateMasterSlice';
 import { getAllSiteMastersByState } from '../Api/SiteApi/SiteApi';
@@ -54,6 +57,7 @@ const BillManager = () => {
 
   const [pendingBills, setPendingBills] = useState([]);
   const [paidBills, setPaidBills] = useState([]);
+  const [bulkBillSendStatus, setBulkBillSendStatus] = useState(null);
 
   const fetchStates = async () => {
     try {
@@ -312,6 +316,63 @@ const handleFlatSelection = (flatId, isChecked) => {
     return date.toLocaleDateString();
   };
 
+
+  
+
+
+  const handleSendBillsInBulk = async () => {
+    try {
+      if (!bills.length) {
+        alert("No bills available to send in bulk.");
+        return;
+      }
+  
+      const generatePDF = () => {
+        const doc = new jsPDF({ orientation: "landscape" });
+        doc.autoTable({
+          html: "#my-table", 
+        });
+        const pdfOutput = doc.output();
+        return btoa(pdfOutput); 
+      };
+  
+      const pdfData = generatePDF();
+      console.log('llll',pdfData)
+  
+      const bulkBillSendReqList = bills.map((bill) => ({
+        email: bill.ownerEmail, 
+        billBase64Url: `data:application/pdf;base64,${pdfData}`,
+      }));
+      console.log('rrr',bulkBillSendReqList);
+
+      const response = await sendBillInBulk(bulkBillSendReqList); 
+      console.log("Bulk Send Response:", response);
+  
+      setBulkBillSendStatus("Bills sent successfully!");
+    } catch (error) {
+      console.error("Error sending bills in bulk:", error);
+      setBulkBillSendStatus("Failed to send bills in bulk.");
+    }
+  };
+  
+
+
+  // const exportPDF = () => {
+  //   const doc = new jsPDF({ orientation: "landscape" });
+  //   doc.autoTable({
+  //     html: "#my-table",
+  //   });
+  //   doc.save("data.pdf");
+  //   var out = doc.output()
+
+  //   var url ='data:application/pdf;base64,'+ btoa(out); 
+  //   console.log('base64',url)
+  // };
+  
+
+
+
+
   return (
     <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -396,7 +457,15 @@ const handleFlatSelection = (flatId, isChecked) => {
         </Table>
       </div>
 
+      <div className="mt-4 sm:mt-6 flex justify-center sm:justify-start">
+    <Button variant="success" onClick={handleSendBillsInBulk}>
+      Send Bills in Bulk
+    </Button>
+  </div>
 
+  {bulkBillSendStatus && (
+    <p className="text-white mt-4">{bulkBillSendStatus}</p>
+  )}
 
       {/* First Modal for Adding Bills */}
       <Modal show={showModal} onHide={closeModal}>
@@ -507,7 +576,7 @@ const handleFlatSelection = (flatId, isChecked) => {
               <Form.Label>Flat</Form.Label>
               <Button
                 variant="outline-primary"
-                className=' mt-4'
+                className="mt-4"
                 onClick={() => setShowFlatSelectionModal(true)}
               >
                 {newBillSecond.flatId.length > 0

@@ -24,7 +24,7 @@ import {
 
 import { getStates } from '../Api/stateapi/stateMasterApi';
 import { setStateMasters } from '../redux/Features/stateMasterSlice';
-import { getAllSiteMastersByState, createSiteMaster, getAllFlatAreaBySiteId } from '../Api/SiteApi/SiteApi';
+import { getAllSiteMastersByState, createSiteMaster, getAllFlatAreaBySiteId, getAllBlocksBySiteId } from '../Api/SiteApi/SiteApi';
 import { setSiteMasters } from '../redux/Features/siteMasterSlice';
 
 const FlatMaster = () => {
@@ -42,19 +42,22 @@ const FlatMaster = () => {
   const [selectedSiteId, setSelectedSiteId] = useState(null);
   const cred = useSelector(state => state.Cred);
   const [areas, setAreas] = useState([]);
+  const [blocks, setBlocks] = useState([]);
+  console.log(blocks);
   console.log(areas)
 
   const [newFlat, setNewFlat] = useState({
     flatNo: '',
     ownerName: '',
     area: '',
+    block: '',
     emailId: '',
     siteMasterId: null,
     creditDays: 30,
     remark: '',
     openingBalance: 0,
   });
-  const [validationError, setValidationError] = useState(''); 
+  const [validationError, setValidationError] = useState('');
 
   const [stateSearchQuery, setStateSearchQuery] = useState('');
   const [siteSearchQuery, setSiteSearchQuery] = useState('');
@@ -102,19 +105,31 @@ const FlatMaster = () => {
     if (selectedSiteId) {
       console.log(selectedSiteId)
       fetchAreas(selectedSiteId);
+      fetchBlocks(selectedSiteId); 
     }
   }, [selectedSiteId]);
-
+  
 
   const fetchAreas = async (siteId) => {
     try {
       const response = await getAllFlatAreaBySiteId(siteId);
-      console.log('Error fetching areas:', response)
+      console.log('Areas fetched:', response);
       setAreas(response);
     } catch (err) {
       console.error('Error fetching areas:', err);
     }
   };
+
+  const fetchBlocks = async (siteId) => {
+    try {
+      const response = await getAllBlocksBySiteId(siteId);
+      console.log('Blocks fetched:', response);
+      setBlocks(response);
+    } catch (err) {
+      console.error('Error fetching blocks:', err);
+    }
+  };
+
 
 
 
@@ -240,6 +255,7 @@ const FlatMaster = () => {
       flatNo: '',
       ownerName: '',
       area: '',
+      block: '',
       emailId: '',
       siteMasterId: null,
       creditDays: 30,
@@ -268,13 +284,33 @@ const FlatMaster = () => {
     }
   };
 
-  // Handle flat edit action
+  
   const handleEdit = (flat) => {
-    setNewFlat(flat);
+    const site = siteMasters.find((site) => site.id === flat.siteMasterId);
+  
+    if (site) {
+      setSelectedStateId(site.stateId); 
+      setSelectedSiteId(flat.siteMasterId); 
+      fetchAreas(flat.siteMasterId);
+      fetchBlocks(flat.siteMasterId);
+    }
+    setNewFlat({
+      flatNo: flat.flatNo,
+      ownerName: flat.ownerName,
+      area: flat.area,
+      block: flat.block,
+      emailId: flat.emailId,
+      siteMasterId: flat.siteMasterId,
+      creditDays: flat.creditDays || 30,
+      remark: flat.remark || '',
+      openingBalance: flat.openingBalance || 0,
+    });
+  
     setFlatId(flat.id);
     setIsEdit(true);
     setShowModal(true);
   };
+  
 
   // Filter states and sites based on search queries
   const filteredStates = stateMasters.filter((state) =>
@@ -285,7 +321,7 @@ const FlatMaster = () => {
   );
 
   return (
-    <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
+    <div className="container-fluid bg-slate-700 pt-20 px-2 mx-auto">
       <div className="flex gap-3 justify-between items-center mb-6">
         <h1 className="text-white text-4xl">Flats</h1>
         <div className="flex gap-3">
@@ -302,6 +338,7 @@ const FlatMaster = () => {
             <th>Flat No</th>
             <th>Owner Name</th>
             <th>Area</th>
+            <th>blocks</th>
             <th>Email</th>
             <th>Site</th>
             <th>Actions</th>
@@ -316,6 +353,7 @@ const FlatMaster = () => {
                   <td>{flat.flatNo}</td>
                   <td>{flat.ownerName}</td>
                   <td>{flat.area}</td>
+                  <td>{flat.block}</td>
                   <td>{flat.emailId}</td>
                   <td>{site ? site.name : 'N/A'}</td>
                   <td>
@@ -441,6 +479,30 @@ const FlatMaster = () => {
                 )}
               </Form.Select>
             </div>
+
+
+            <div className="mb-3">
+              <Form.Label>Blocks</Form.Label>
+              <Form.Select
+                name="block"
+                value={newFlat.block}
+                onChange={handleChange}
+                aria-label="Select Blocks"
+              >
+                <option value="">Select Blocks</option>
+                {Array.isArray(blocks) && blocks.length > 0 ? (
+                  blocks.map((block, index) => (
+                    <option key={index} value={block}>
+                      {block}
+                    </option>
+                  ))
+                ) : (
+                  <option>No blocks available</option>
+                )}
+              </Form.Select>
+
+            </div>
+
 
             <div className="mb-3">
               <Form.Label>Email</Form.Label>
