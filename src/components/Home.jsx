@@ -8,8 +8,22 @@ import {
 import ActivityStatus from "./Table";
 import TrafficSource from "./Traffic";
 import { Link } from "react-router-dom";
+import { getAllPaidOrUnPaidBillAmountByDate } from "../Api/BillApi/BillApi";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 function Home() {
+  const cred = useSelector((state) => state.Cred);
+  const { token } = useSelector((state) => state.login);
+  const [allUnPaidAmount, setAllUnPaidAmount] = useState(0);
+  const [allPaidBill, setAllPaidBill] = useState(0);
+  let date = new Date();
+  let fromDate = new Date(date.getFullYear(), date.getMonth());
+  let endDate = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate() + 1
+  );
   return (
     <main className="main-container">
       <div className="grid sm:grid-cols-4 gap-3">
@@ -19,10 +33,10 @@ function Home() {
           style={{ textDecoration: "none" }}
         >
           <div className="card-inner">
-            <h3 className="text-2xl">Expense</h3>
+            <h3 className="text-2xl">Paid Bill</h3>
             <BsFillArchiveFill className="card_icon" />
           </div>
-          <h1 className="mt-3 text-lg">$24k</h1>
+          <h1 className="mt-3 text-lg">₹ {allPaidBill}</h1>
         </Link>
         <Link
           to={"/society"}
@@ -52,10 +66,10 @@ function Home() {
           style={{ textDecoration: "none" }}
         >
           <div className="card-inner">
-            <h3 className="text-2xl">Other</h3>
+            <h3 className="text-2xl">Unpaid Bill</h3>
             <BsFillBellFill className="card_icon" />
           </div>
-          <h1 className="mt-3 text-lg">$15k</h1>
+          <h1 className="mt-3 text-lg">₹ {allUnPaidAmount}</h1>
         </Link>
       </div>
       <div className="status-section">

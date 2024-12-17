@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import {jwtDecode} from "jwt-decode";
-import { loginRequest, loginSuccess, loginFailure } from "../redux/Features/loginSlice";
+import { jwtDecode } from "jwt-decode";
+import {
+  loginRequest,
+  loginSuccess,
+  loginFailure,
+} from "../redux/Features/loginSlice";
 import { setUser } from "../redux/Features/UserSlice";
 import { BASE_URL } from "../utils/BaseUrl";
 
@@ -25,6 +29,7 @@ function SignIn() {
       );
 
       const token = response.data.token;
+
       localStorage.setItem("USER_TOKEN", token);
       const decoded = jwtDecode(token);
 
@@ -48,7 +53,10 @@ function SignIn() {
             <h2 className="text-2xl font-semibold mb-4 text-black">Sign In</h2>
             <form onSubmit={handleSignIn}>
               <div className="form-group mb-4">
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="username"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Username
                 </label>
                 <input
@@ -62,7 +70,10 @@ function SignIn() {
                 />
               </div>
               <div className="form-group mb-4">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Password
                 </label>
                 <input

@@ -180,13 +180,14 @@ const SiteMaster = () => {
                 <td>{site.totalUnits}</td>
                 <td>{site.flatTypes.join(", ")}</td>
                 <td>
-                  {
-                    stateMasters.find((state) => state.id === site.stateMasterId)
-                      ?.name || "Unknown"
-                  }
+                  {stateMasters.find((state) => state.id === site.stateMasterId)
+                    ?.name || "Unknown"}
                 </td>
                 <td>
-                  <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={<Tooltip>Edit</Tooltip>}
+                  >
                     <Button
                       variant="link"
                       className="p-0 text-primary"
@@ -195,7 +196,10 @@ const SiteMaster = () => {
                       <FaEdit />
                     </Button>
                   </OverlayTrigger>
-                  <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={<Tooltip>Delete</Tooltip>}
+                  >
                     <Button
                       variant="link"
                       className="p-0 text-danger"
@@ -247,7 +251,9 @@ const SiteMaster = () => {
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{isEdit ? "Edit Site Master" : "Add New Site Master"}</Modal.Title>
+          <Modal.Title>
+            {isEdit ? "Edit Site Master" : "Add New Site Master"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -295,7 +301,10 @@ const SiteMaster = () => {
                 name="flatTypes"
                 value={newSite.flatTypes.join(", ")}
                 onChange={(e) =>
-                  setNewSite({ ...newSite, flatTypes: e.target.value.split(", ") })
+                  setNewSite({
+                    ...newSite,
+                    flatTypes: e.target.value.split(", "),
+                  })
                 }
                 placeholder="e.g., 1BHK, 2BHK, 3BHK"
               />
@@ -319,28 +328,6 @@ const SiteMaster = () => {
 };
 
 export default SiteMaster;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import React, { useState, useEffect } from "react";
 // import { useDispatch, useSelector } from "react-redux";
@@ -564,4 +551,3 @@ export default SiteMaster;
 // };
 
 // export default SiteMaster;
-
