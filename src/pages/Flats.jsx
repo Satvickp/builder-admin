@@ -18,11 +18,13 @@ import {
   createFlatMaster,
   getFlatsBySiteAndState,
   updateFlatMaster,
-  getAllFlats
+  getAllFlats,
+
 } from '../Api/FlatApi/FlatApi';
+
 import { getStates } from '../Api/stateapi/stateMasterApi';
 import { setStateMasters } from '../redux/Features/stateMasterSlice';
-import { getAllSiteMastersByState, createSiteMaster } from '../Api/SiteApi/SiteApi';
+import { getAllSiteMastersByState, createSiteMaster, getAllFlatAreaBySiteId } from '../Api/SiteApi/SiteApi';
 import { setSiteMasters } from '../redux/Features/siteMasterSlice';
 
 const FlatMaster = () => {
@@ -39,6 +41,8 @@ const FlatMaster = () => {
   const [selectedStateId, setSelectedStateId] = useState(null);
   const [selectedSiteId, setSelectedSiteId] = useState(null);
   const cred = useSelector(state => state.Cred);
+  const [areas, setAreas] = useState([]);
+  console.log(areas)
 
   const [newFlat, setNewFlat] = useState({
     flatNo: '',
@@ -50,6 +54,7 @@ const FlatMaster = () => {
     remark: '',
     openingBalance: 0,
   });
+  const [validationError, setValidationError] = useState(''); 
 
   const [stateSearchQuery, setStateSearchQuery] = useState('');
   const [siteSearchQuery, setSiteSearchQuery] = useState('');
@@ -91,20 +96,43 @@ const FlatMaster = () => {
     fetchAllFlats();
   }, []);
 
+
+
+  useEffect(() => {
+    if (selectedSiteId) {
+      console.log(selectedSiteId)
+      fetchAreas(selectedSiteId);
+    }
+  }, [selectedSiteId]);
+
+
+  const fetchAreas = async (siteId) => {
+    try {
+      const response = await getAllFlatAreaBySiteId(siteId);
+      console.log('Error fetching areas:', response)
+      setAreas(response);
+    } catch (err) {
+      console.error('Error fetching areas:', err);
+    }
+  };
+
+
+
+
   const fetchAllFlats = async () => {
     dispatch(setLoading('loading'));
     try {
       const response = await getAllFlats(cred.id);
       dispatch(
         setFlats({
-          flats: response.content, 
+          flats: response.content,
           totalElement: response.totalElements,
           totalPages: response.totalPages,  // Store totalPages in Redux
           page: response.page,
         })
       );
     } catch (err) {
-      console.error(err);
+
       dispatch(setError(err.message));
     } finally {
       dispatch(setLoading('succeeded'));
@@ -156,6 +184,8 @@ const FlatMaster = () => {
   // Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (validationError) setValidationError('');
+
     setNewFlat((prev) => ({
       ...prev,
       [name]: value,
@@ -164,6 +194,13 @@ const FlatMaster = () => {
 
   // Handle create flat action
   const handleCreate = async () => {
+
+    const duplicateFlat = flats.find(flat => flat.flatNo === newFlat.flatNo);
+
+    if (duplicateFlat) {
+      setValidationError(`Flat No ${newFlat.flatNo} already exists.`);
+      return;
+    }
     if (!selectedSiteId) {
       alert('Please select or add a site before adding a flat.');
       return;
@@ -213,6 +250,12 @@ const FlatMaster = () => {
 
   // Handle update flat action
   const handleUpdate = async () => {
+    const duplicateFlat = flats.find(flat => flat.flatNo === newFlat.flatNo && flat.id !== flatId);
+
+    if (duplicateFlat) {
+      setValidationError(`Flat No ${newFlat.flatNo} already exists.`);
+      return;
+    }
     dispatch(setLoading('loading'));
     try {
       const updatedFlat = await updateFlatMaster(flatId, newFlat);
@@ -277,8 +320,7 @@ const FlatMaster = () => {
                   <td>{site ? site.name : 'N/A'}</td>
                   <td>
                     <OverlayTrigger overlay={<Tooltip>Edit Flat</Tooltip>}>
-                      <Button variant="link"
-                      className="p-0 text-primary" onClick={() => handleEdit(flat)}>
+                      <Button variant="link" className="p-0 text-primary" onClick={() => handleEdit(flat)}>
                         <FaEdit />
                       </Button>
                     </OverlayTrigger>
@@ -292,6 +334,7 @@ const FlatMaster = () => {
             </tr>
           )}
         </tbody>
+
       </Table>
 
       {/* Pagination Component */}
@@ -364,6 +407,9 @@ const FlatMaster = () => {
                 onChange={handleChange}
                 required
               />
+              {validationError && (
+                <p className="text-danger">{validationError}</p>
+              )}
             </div>
             <div className="mb-3">
               <Form.Label>Owner Name</Form.Label>
@@ -377,14 +423,25 @@ const FlatMaster = () => {
             </div>
             <div className="mb-3">
               <Form.Label>Area</Form.Label>
-              <FormControl
-                type="text"
+              <Form.Select
                 name="area"
                 value={newFlat.area}
                 onChange={handleChange}
-                required
-              />
+                aria-label="Select Area"
+              >
+                <option value="">Select Area</option>
+                {Array.isArray(areas) && areas.length > 0 ? (
+                  areas.map((area, index) => (
+                    <option key={index} value={area}>
+                      {area}
+                    </option>
+                  ))
+                ) : (
+                  <option>No areas available</option>
+                )}
+              </Form.Select>
             </div>
+
             <div className="mb-3">
               <Form.Label>Email</Form.Label>
               <FormControl

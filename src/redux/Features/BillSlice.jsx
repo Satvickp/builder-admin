@@ -4,6 +4,8 @@ const billSlice = createSlice({
   name: 'bills',
   initialState: {
     bills: [],
+    pendingBills: [],  
+    paidBills: [],     
     loading: false,
     error: null,
   },
@@ -12,7 +14,6 @@ const billSlice = createSlice({
       state.bills = action.payload;
     },
     addBill(state, action) {
-       //state.bills =[action.payload];
        state.bills.push(action.payload);
     },
     updateBill(state, action) {
@@ -31,14 +32,23 @@ const billSlice = createSlice({
       state.error = action.payload;
     },
     setPendingBills(state, action) {
-      state.pendingBills = action.payload; // Store pending bills
+      state.pendingBills = action.payload; 
     },
     setPaidBills(state, action) {
-      state.paidBills = action.payload; // Store paid bills
+      state.paidBills = action.payload; 
     },
   },
 });
 
-export const { setPendingBills,setPaidBills,setBills, addBill, updateBill, removeBill, setLoading, setError } = billSlice.actions;
+export const { 
+  setPendingBills, 
+  setPaidBills, 
+  setBills, 
+  addBill, 
+  updateBill, 
+  removeBill, 
+  setLoading, 
+  setError 
+} = billSlice.actions;
 
 export default billSlice.reducer;

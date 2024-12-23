@@ -14,13 +14,21 @@ const baseUrl =  `${BASE_URL.DEV_URL}/bill-generator-service/bills`
 //     },
 //   });
 
-export const createBillsWithFlatId = (data) =>
-  axios.post(`${baseUrl}/createWithFlatId`, data, {
-    headers: {
-      'Accept': '*/*',
-      'Content-Type': 'application/json',
-    },
-  });
+export const createBillsWithFlatId = async (data) => {
+  try {
+    const response = await axios.post(`${baseUrl}/createWithFlatId`, data, {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log('logo',response);
+    return response;
+  } catch (error) {
+    console.error("Error creating bill:", error);
+    throw error; 
+  }
+};
 
 export const createBillsInBulkWithoutFlatId = (data) =>
   axios.post(`${baseUrl}/createAllInBulkWithoutFlatId`, data, {

@@ -21,6 +21,13 @@ export const updateSiteMaster = (id, data) =>
     },
   });
 
+  export const getAllFlatAreaBySiteId = async (siteId) => {
+    const response = await axios.get(`${baseUrl}/getAllFlatAreaBySiteId/${siteId}`);
+    console.log(response)
+    return response.data;
+  }
+
+
 
 // export const getSiteMaster = async (Id) => {
 //   const resp = await axios.get(`${baseUrl}/all/${Id}`, {
