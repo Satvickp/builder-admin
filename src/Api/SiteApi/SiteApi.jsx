@@ -1,10 +1,8 @@
-// src/api/siteMasterApi.js
 import axios from 'axios';
-import { BASE_URL } from "../../utils/BaseUrl"
+import { BASE_URL } from "../../utils/BaseUrl";
 
-// const BASE_URL = 'https://api-dev.prismgate.in/bill-generator-service/site-masters';
 
-const baseUrl =  `${BASE_URL.DEV_URL}/bill-generator-service/site-masters`
+const baseUrl = `${BASE_URL.DEV_URL}/bill-generator-service/site-masters`;
 
 export const createSiteMaster = (data) =>
   axios.post(`${baseUrl}/create`, data, {
@@ -14,6 +12,7 @@ export const createSiteMaster = (data) =>
     },
   });
 
+
 export const updateSiteMaster = (id, data) =>
   axios.put(`${baseUrl}/update/${id}`, data, {
     headers: {
@@ -22,22 +21,48 @@ export const updateSiteMaster = (id, data) =>
     },
   });
 
-export const getSiteMaster = async (id) =>{
-  const resp = await axios.get(`${baseUrl}/${id}`, {
-    headers: {
-      'Accept': '*/*',
-      'Content-Type': 'application/json',
-    },
-  
-  });
-  console.log(resp.data)
-  return resp.data;
-}
 
-export const getAllSiteMastersByState = (stateId) =>
-  axios.get(`${baseUrl}/state/${stateId}`, {
+// export const getSiteMaster = async (Id) => {
+//   const resp = await axios.get(`${baseUrl}/all/${Id}`, {
+//     headers: {
+//       'Accept': '*/*',
+//       'Content-Type': 'application/json',
+//     },
+//   });
+//   console.log(resp.data);
+//   return resp.data;
+// };
+
+
+export const getAllSiteMastersByState = (stateId, builderId) =>
+  axios.get(`${baseUrl}/state/${stateId}/${builderId}`, {
     headers: {
       'Accept': '*/*',
       'Content-Type': 'application/json',
     },
   });
+
+
+export const deleteSite = async (id) => {
+  await axios.delete(`${baseUrl}/site/${id}`, {
+    headers: {
+      'accept': '*/*',
+      'Content-Type': 'application/json',
+    },
+  });
+};
+
+// New Function to fetch site masters by builder ID with pagination and sorting
+export const getAllSiteMasters = async (builderId,page = 0,pageSize = 10,sortBy = 'createdTime',sortDirection = 'desc') => {
+  const response = await axios.get(
+    `${baseUrl}/getAllState/${builderId}`,
+    {
+      params: { page, pageSize, sortBy, sortDirection },
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.data;
+};
