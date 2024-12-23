@@ -368,7 +368,7 @@ const FlatMaster = () => {
             })
           ) : (
             <tr>
-              <td colSpan="6">No flats available</td>
+              <td colSpan="7">No flats available</td>
             </tr>
           )}
         </tbody>

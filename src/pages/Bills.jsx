@@ -158,7 +158,7 @@ const BillManager = () => {
     if (newBillSecond.siteId && newBillSecond.stateId) fetchFlats(newBillSecond.stateId, newBillSecond.siteId);
   }, [newBillSecond.siteId, newBillSecond.stateId]);
 
-  const openModal = () => setShowModal(true);
+  const   openModal = () => setShowModal(true);
   const closeModal = () => {
     setShowModal(false);
     setNewBill({
@@ -341,7 +341,7 @@ const handleFlatSelection = (flatId, isChecked) => {
   
       const bulkBillSendReqList = bills.map((bill) => ({
         email: bill.ownerEmail, 
-        billBase64Url: `data:application/pdf;base64,${pdfData}`,
+        billBase64Url: `${pdfData}`,
       }));
       console.log('rrr',bulkBillSendReqList);
 
@@ -390,7 +390,7 @@ const handleFlatSelection = (flatId, isChecked) => {
       {error && <p className="text-red-500">Error: {error}</p>}
 
       <div className="table-container bg-white">
-        <Table striped bordered hover variant="dark" className="table">
+        <Table responsive striped bordered hover variant="dark" className="table">
           <thead>
             <tr>
               <th>Bill Date</th>
