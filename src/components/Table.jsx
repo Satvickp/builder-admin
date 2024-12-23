@@ -6,54 +6,59 @@ function ActivityStatus() {
   return (
     <div className="activity-status-container">
       <h3 className="table-title">Activity Status</h3>
-      <Table striped bordered hover className="activity-table">
-        <thead>
-          <tr>
-            <th>Activity</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Customer Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Update taskbar</td>
-            <td>12/12/2024</td>
-            <td>4:30pm</td>
-            <td>Ramesh Kumar</td>
-          </tr>
-          <tr>
-          <td>Update taskbar</td>
-            <td>12/12/2024</td>
-            <td>4:30pm</td>
-            <td>Ramesh Kumar</td>
-          </tr>
-          <tr>
-          <td>Update taskbar</td>
-            <td>12/12/2024</td>
-            <td>4:30pm</td>
-            <td>Ramesh Kumar</td>
-          </tr>
-          <tr>
-          <td>Update taskbar</td>
-            <td>12/12/2024</td>
-            <td>4:30pm</td>
-            <td>Ramesh Kumar</td>
-          </tr>
-          <tr>
-          <td>Update taskbar</td>
-            <td>12/12/2024</td>
-            <td>4:30pm</td>
-            <td>Ramesh Kumar</td>
-          </tr>
-         
-        </tbody>
-      </Table>
+      <div className="table-responsive"> {/* Make table scrollable on small screens */}
+        <Table striped bordered hover className="activity-table">
+          <thead>
+            <tr>
+              <th>Activity</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Customer Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Update taskbar</td>
+              <td>12/12/2024</td>
+              <td>4:30pm</td>
+              <td>Ramesh Kumar</td>
+            </tr>
+            <tr>
+              <td>Update taskbar</td>
+              <td>12/12/2024</td>
+              <td>4:30pm</td>
+              <td>Ramesh Kumar</td>
+            </tr>
+            <tr>
+              <td>Update taskbar</td>
+              <td>12/12/2024</td>
+              <td>4:30pm</td>
+              <td>Ramesh Kumar</td>
+            </tr>
+            <tr>
+              <td>Update taskbar</td>
+              <td>12/12/2024</td>
+              <td>4:30pm</td>
+              <td>Ramesh Kumar</td>
+            </tr>
+            <tr>
+              <td>Update taskbar</td>
+              <td>12/12/2024</td>
+              <td>4:30pm</td>
+              <td>Ramesh Kumar</td>
+            </tr>
+          </tbody>
+        </Table>
+      </div>
     </div>
   );
 }
 
 export default ActivityStatus;
+
+
+
+
 // const ActivityStatus = () => {
 //   // Data for activity logs
 //   const activityData = [

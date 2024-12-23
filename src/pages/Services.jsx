@@ -119,7 +119,7 @@ const ServiceMaster = () => {
   };
 
   return (
-    <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
+    <div className="container-fluid bg-slate-700 pt-20 px-2.2 mx-auto">
       <div className="flex gap-3 justify-between items-center mb-6">
         <h2 className='text-white ml-4 text-4xl'>Service</h2>
         <Button variant="primary" onClick={() => { resetForm(); setShowModal(true); }}>

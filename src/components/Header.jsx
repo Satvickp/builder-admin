@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import "./Style.css";
 import {
   BsFillBellFill,
@@ -8,17 +8,18 @@ import {
   BsJustify,
 } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setUser } from "../redux/Features/UserSlice"; 
 
 function Header({ OpenSidebar }) {
   const navigate = useNavigate();
-  const token = window.localStorage.getItem("USER_TOKEN");
+  const dispatch = useDispatch();
 
-  function handleLogout() {
-    window.localStorage.removeItem("USER_TOKEN");
-    navigate("/signin");
-  }
-
-  useEffect(() => {}, [token]);
+  const handleLogout = () => {
+    localStorage.removeItem("USER_TOKEN");
+    dispatch(setUser(null));
+    navigate("/signin", { replace: true });
+  };
 
   return (
     <header className="header">
@@ -31,7 +32,10 @@ function Header({ OpenSidebar }) {
       <div className="header-right text-white">
         <BsFillBellFill className="icon" />
         <BsFillEnvelopeFill className="icon" />
-        <BsPersonCircle className="icon" onClick={handleLogout} />
+        <BsPersonCircle
+          className="icon hover:cursor-pointer"
+          onClick={handleLogout}
+        />
       </div>
     </header>
   );
