@@ -80,7 +80,6 @@ function SignIn() {
   const handleVerifyOtp = async () => {
     try {
       const verifyResponse = await verifySignupOtp(email, otp);
-      console.log("OTP verification successful:", verifyResponse);
       setUserId(verifyResponse);
       setShowModal(false);
       setShowResetModal(true);
