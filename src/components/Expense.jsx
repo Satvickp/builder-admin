@@ -76,9 +76,11 @@ function Expense() {
 
   const getAllSite = async () => {
     try {
-      const response = await getAllSiteMasters(token, cred.id);
+      const response = await getAllSiteMasters(cred.id);
       setSiteMaster(response.content);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error.message);
+    }
   };
   useEffect(() => {
     getAllSite();

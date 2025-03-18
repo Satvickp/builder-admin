@@ -1,8 +1,88 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./Style.css"; // Include your custom CSS
 import Table from "react-bootstrap/Table";
+import {
+  activityLogs,
+  deleteActivityLogs,
+  getAllLogs,
+  getAllLogsForBills,
+} from "../Api/ActivityLogApi/ActivityLogApi";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  setActivityLogs,
+  setAllActivityLogs,
+  setAllActivityLogsForBills,
+  deleteLogs,
+} from "../redux/Features/ActivityLogSlice";
 
 function ActivityStatus() {
+  const dispatch = useDispatch();
+  const { token } = useSelector((state) => state.login);
+  const cred = useSelector((state) => state.Cred);
+  const activityLog = useSelector((state) => state.activityLog.activityLog);
+  const allActivityLogs = useSelector(
+    (state) => state.activityLog.allActivityLogs
+  );
+  let date = new Date();
+  let fromDate = new Date(date.getFullYear(), date.getMonth());
+  let endDate = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate() + 1
+  );
+
+  // const getActivityLog = async () => {
+  //   const resp = await activityLogs(token.storagetoken, 3);
+  //   // console.log(resp);
+  //   dispatch(setActivityLogs(resp));
+  // };
+  // useEffect(() => {
+  //   getActivityLog();
+  // }, []);
+  // console.log(activityLog);
+
+  const getAllLogsofActivityLog = async () => {
+    const resp = await getAllLogs(
+      token.storagetoken,
+      1,
+      10,
+      "desc",
+      "createdTime",
+      cred.id,
+      fromDate.toISOString(),
+      endDate.toISOString()
+    );
+    console.log(resp);
+  };
+  useEffect(() => {
+    getAllLogsofActivityLog();
+  });
+
+  // const getAllLogsForBillsOfActivityLog = async () => {
+  //   const resp = await getAllLogsForBills(
+  //     token.storagetoken,
+  //     1,
+  //     10,
+  //     "desc",
+  //     "createdTime",
+  //     cred.id,
+  //     fromDate.toISOString(),
+  //     endDate.toISOString()
+  //   );
+  //   console.log(resp);
+  // };
+  // useEffect(() => {
+  //   getAllLogsForBillsOfActivityLog();
+  // });
+
+  // const deletelogs = async () => {
+  //   const resp = await deleteActivityLogs(token.storagetoken, 2);
+  //   console.log(resp);
+  // };
+  // useEffect(() => {
+  //   deletelogs();
+  // });
+
   const data = [
     {
       customerName: "John Doe",
@@ -21,66 +101,6 @@ function ActivityStatus() {
       activityStatus: "In Progress",
       date: "03/12/24",
       time: "11:15 AM",
-    },
-    {
-      customerName: "Michael Brown",
-      activityStatus: "Completed",
-      date: "04/12/24",
-      time: "04:45 PM",
-    },
-    {
-      customerName: "Sarah Wilson",
-      activityStatus: "Pending",
-      date: "05/12/24",
-      time: "09:00 AM",
-    },
-    {
-      customerName: "David Taylor",
-      activityStatus: "Completed",
-      date: "06/12/24",
-      time: "01:30 PM",
-    },
-    {
-      customerName: "Emma Davis",
-      activityStatus: "In Progress",
-      date: "07/12/24",
-      time: "03:45 PM",
-    },
-    {
-      customerName: "Chris Martin",
-      activityStatus: "Pending",
-      date: "08/12/24",
-      time: "10:00 AM",
-    },
-    {
-      customerName: "Sophia Moore",
-      activityStatus: "Completed",
-      date: "09/12/24",
-      time: "05:30 PM",
-    },
-    {
-      customerName: "James Anderson",
-      activityStatus: "In Progress",
-      date: "10/12/24",
-      time: "12:15 PM",
-    },
-    {
-      customerName: "Olivia Thomas",
-      activityStatus: "Completed",
-      date: "11/12/24",
-      time: "02:30 PM",
-    },
-    {
-      customerName: "Liam Thompson",
-      activityStatus: "Pending",
-      date: "12/12/24",
-      time: "11:00 AM",
-    },
-    {
-      customerName: "Noah White",
-      activityStatus: "In Progress",
-      date: "13/12/24",
-      time: "04:00 PM",
     },
   ];
   return (
@@ -148,47 +168,3 @@ function ActivityStatus() {
 }
 
 export default ActivityStatus;
-// const ActivityStatus = () => {
-//   // Data for activity logs
-//   const activityData = [
-//     { status: 'green', activity: 'Update taskbar', date: '12/12/2024', time: '4:30 pm', customer: 'Ramesh Kumar' },
-//     { status: 'green', activity: 'Update taskbar', date: '12/12/2024', time: '4:30 pm', customer: 'Ramesh Kumar' },
-//     { status: 'red', activity: 'Update taskbar', date: '12/12/2024', time: '4:30 pm', customer: 'Ramesh Kumar' },
-//     { status: 'yellow', activity: 'Update taskbar', date: '12/12/2024', time: '4:30 pm', customer: 'Ramesh Kumar' },
-//   ];
-
-//   return (
-//     <div className='top'>
-//     <div className="activity-status-container">
-//       {/* <div className="activity-header"> */}
-//         <h3>Activity Status</h3>
-//         <span className="sync-btn">🔄 Sync</span>
-//       {/* </div> */}
-//       <table className="activity-table">
-//         <thead>
-//           <tr>
-//             <th>Activity</th>
-//             <th>Date</th>
-//             <th>Time</th>
-//             <th>Customer Name</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {activityData.map((item, index) => (
-//             <tr key={index}>
-//               <td>
-//                 <span className={`status-dot ${item.status}`}></span> {item.activity}
-//               </td>
-//               <td>{item.date}</td>
-//               <td>{item.time}</td>
-//               <td>{item.customer}</td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//     </div>
-//   );
-// };
-
-// export default ActivityStatus;

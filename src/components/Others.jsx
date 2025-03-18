@@ -79,7 +79,7 @@ function Others() {
 
   const getAllSite = async () => {
     try {
-      const response = await getAllSiteMasters(token, cred.id);
+      const response = await getAllSiteMasters(cred.id);
       setSiteMaster(response.content);
     } catch (error) {}
   };
