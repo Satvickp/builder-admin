@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Table, Button, Modal, Form, Pagination, OverlayTrigger, Tooltip } from "react-bootstrap";
+import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Pagination,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {
@@ -43,7 +51,6 @@ const SiteMaster = () => {
     sortDirection: "desc",
   });
 
-
   const fetchSites = async () => {
     try {
       dispatch(setLoading());
@@ -64,7 +71,6 @@ const SiteMaster = () => {
     }
   };
 
-
   const handleStateSelect = (id) => {
     setStateId(id);
     setNewSite({
@@ -72,7 +78,6 @@ const SiteMaster = () => {
       stateMasterId: id,
     });
   };
-
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -82,7 +87,6 @@ const SiteMaster = () => {
     const { name, value } = e.target;
     setNewSite({ ...newSite, [name]: value });
   };
-
 
   const handleCreate = async () => {
     dispatch(setLoading());
@@ -101,7 +105,6 @@ const SiteMaster = () => {
     }
   };
 
-
   const handleUpdate = async () => {
     dispatch(setLoading());
     try {
@@ -119,7 +122,6 @@ const SiteMaster = () => {
     }
   };
 
-
   const handleEdit = (site) => {
     setNewSite({
       ...site,
@@ -130,7 +132,6 @@ const SiteMaster = () => {
     setIsEdit(true);
     setShowModal(true);
   };
-
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this site?")) {
@@ -144,7 +145,6 @@ const SiteMaster = () => {
       }
     }
   };
-
 
   const handlePageChange = (pageNumber) => {
     setPagination((prev) => ({ ...prev, page: pageNumber }));
@@ -161,7 +161,6 @@ const SiteMaster = () => {
     setStateId(null);
     setIsEdit(false);
   };
-
 
   useEffect(() => {
     if (!stateId && stateMasters.length > 0) {
@@ -180,10 +179,9 @@ const SiteMaster = () => {
 
   const filteredStateMasters = stateMasters.filter((state) =>
     state.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  );
 
   return (
-
     <div className="container-fluid bg-slate-700 pt-20 px-2.8">
       <div className="row align-items-center mb-4">
         <div className="col-md-6 col-12">
@@ -194,7 +192,6 @@ const SiteMaster = () => {
             Add New
           </Button>
         </div>
-
       </div>
 
       {status === "loading" && <p className="text-white">Loading...</p>}
@@ -219,15 +216,17 @@ const SiteMaster = () => {
                   <td>{site.name}</td>
                   <td>{site.totalUnits}</td>
                   <td>{site.flatTypes.join(", ")}</td>
-                  <td>{site.blockList.join(" ,")}</td>
+                  {/* <td>{site.blockList.join(" ,")}</td> */}
                   <td>
-                    {
-                      stateMasters.find((state) => state.id === site.stateMasterId)
-                        ?.name || "Unknown"
-                    }
+                    {stateMasters.find(
+                      (state) => state.id === site.stateMasterId
+                    )?.name || "Unknown"}
                   </td>
                   <td>
-                    <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
+                    <OverlayTrigger
+                      placement="top"
+                      overlay={<Tooltip>Edit</Tooltip>}
+                    >
                       <Button
                         variant="link"
                         className="p-0 text-primary"
@@ -236,7 +235,10 @@ const SiteMaster = () => {
                         <FaEdit />
                       </Button>
                     </OverlayTrigger>
-                    <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
+                    <OverlayTrigger
+                      placement="top"
+                      overlay={<Tooltip>Delete</Tooltip>}
+                    >
                       <Button
                         variant="link"
                         className="p-0 text-danger"
@@ -289,7 +291,9 @@ const SiteMaster = () => {
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{isEdit ? "Edit Site Master" : "Add New Site Master"}</Modal.Title>
+          <Modal.Title>
+            {isEdit ? "Edit Site Master" : "Add New Site Master"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -341,7 +345,9 @@ const SiteMaster = () => {
                 onChange={(e) =>
                   setNewSite({
                     ...newSite,
-                    flatTypes: e.target.value.split(",").map((item) => item.trim()),
+                    flatTypes: e.target.value
+                      .split(",")
+                      .map((item) => item.trim()),
                   })
                 }
                 placeholder="e.g., 1000, 2000, 5000"
@@ -357,13 +363,14 @@ const SiteMaster = () => {
                 onChange={(e) =>
                   setNewSite({
                     ...newSite,
-                    blockList: e.target.value.split(",").map((item) => item.trim()),
+                    blockList: e.target.value
+                      .split(",")
+                      .map((item) => item.trim()),
                   })
                 }
                 placeholder="e.g., A, B, C"
               />
             </Form.Group>
-
           </Form>
         </Modal.Body>
         <Modal.Footer>
@@ -380,29 +387,9 @@ const SiteMaster = () => {
       </Modal>
     </div>
   );
-
-
 };
 
 export default SiteMaster;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import React, { useState, useEffect } from "react";
 // import { useDispatch, useSelector } from "react-redux";
@@ -626,4 +613,3 @@ export default SiteMaster;
 // };
 
 // export default SiteMaster;
-

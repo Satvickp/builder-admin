@@ -3,23 +3,31 @@ import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-import { loginRequest, loginSuccess, loginFailure } from "../redux/Features/loginSlice";
+import {
+  loginRequest,
+  loginSuccess,
+  loginFailure,
+} from "../redux/Features/loginSlice";
 import { setUser } from "../redux/Features/UserSlice";
 import { BASE_URL } from "../utils/BaseUrl";
-import { sendOtp, verifySignupOtp, resetPassword } from "../Api/passwordApi/PasswordApi"; // Import resetPassword
+import {
+  sendOtp,
+  verifySignupOtp,
+  resetPassword,
+} from "../Api/passwordApi/PasswordApi"; // Import resetPassword
 
 function SignIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [email, setEmail] = useState(""); 
-  const [otp, setOtp] = useState(""); 
-  const [newPassword, setNewPassword] = useState(""); 
-  const [confirmPassword, setConfirmPassword] = useState(""); 
-  const [showModal, setShowModal] = useState(false); 
-  const [showResetModal, setShowResetModal] = useState(false); 
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
   const [userId, setUserId] = useState("");
-  const [otpSent, setOtpSent] = useState(false); 
-  const [intervalId, setIntervalId] = useState(null); 
+  const [otpSent, setOtpSent] = useState(false);
+  const [intervalId, setIntervalId] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -33,6 +41,7 @@ function SignIn() {
         { headers: { "Content-Type": "application/json" } }
       );
       const token = response.data.token;
+
       localStorage.setItem("USER_TOKEN", token);
       const decoded = jwtDecode(token);
       dispatch(setUser(decoded));
@@ -40,7 +49,8 @@ function SignIn() {
       navigate("/");
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || "Failed to login. Please check your credentials.";
+        error.response?.data?.message ||
+        "Failed to login. Please check your credentials.";
       dispatch(loginFailure(errorMessage));
       console.error("Error:", error);
     }
@@ -50,7 +60,6 @@ function SignIn() {
     setShowModal(true);
   };
 
-  
   const handleSendOtp = async () => {
     try {
       const otpResponse = await sendOtp(email);
@@ -64,7 +73,7 @@ function SignIn() {
   const handleOtpChange = (e) => {
     setOtp(e.target.value);
     if (e.target.value.length > 0 && intervalId) {
-      clearInterval(intervalId); 
+      clearInterval(intervalId);
     }
   };
 
@@ -72,7 +81,7 @@ function SignIn() {
     try {
       const verifyResponse = await verifySignupOtp(email, otp);
       setUserId(verifyResponse);
-      setShowModal(false); 
+      setShowModal(false);
       setShowResetModal(true);
     } catch (error) {
       console.error("OTP verification failed:", error);
@@ -80,16 +89,15 @@ function SignIn() {
     }
   };
 
- 
   const handleResetPassword = async () => {
     if (newPassword !== confirmPassword) {
       alert("Passwords do not match. Please try again.");
       return;
     }
-  
+
     try {
       await resetPassword(userId, newPassword); // Pass userId if required
-      console.log('userId',resetPassword)
+      console.log("userId", resetPassword);
       alert("Password reset successful. Please login with your new password.");
       setShowResetModal(false);
     } catch (error) {
@@ -97,8 +105,6 @@ function SignIn() {
       alert("Failed to reset password. Please try again.");
     }
   };
-  
-
 
   return (
     <div className="p-0 flex items-center justify-center min-h-screen w-full bg-[#1d2634] text-[#f4f5f7] font-poppins">
@@ -108,7 +114,10 @@ function SignIn() {
             <h2 className="text-2xl font-semibold mb-4 text-black">Sign In</h2>
             <form onSubmit={handleSignIn}>
               <div className="form-group mb-4">
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="username"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Username
                 </label>
                 <input
@@ -122,7 +131,10 @@ function SignIn() {
                 />
               </div>
               <div className="form-group mb-4">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Password
                 </label>
                 <input
@@ -147,7 +159,10 @@ function SignIn() {
               >
                 Sign In
               </button>
-              <p className="mt-4 text-sm text-blue-600 cursor-pointer" onClick={handleForgetPassword}>
+              <p
+                className="mt-4 text-sm text-blue-600 cursor-pointer"
+                onClick={handleForgetPassword}
+              >
                 Forget Password?
               </p>
             </form>
@@ -162,9 +177,14 @@ function SignIn() {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
-            <h3 className="text-xl font-semibold mb-4 text-black">Enter Your Email</h3>
+            <h3 className="text-xl font-semibold mb-4 text-black">
+              Enter Your Email
+            </h3>
             <div className="mb-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email
               </label>
               <input
@@ -199,9 +219,14 @@ function SignIn() {
       {otpSent && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
-            <h3 className="text-xl font-semibold mb-4 text-black">Verify OTP</h3>
+            <h3 className="text-xl font-semibold mb-4 text-black">
+              Verify OTP
+            </h3>
             <div className="mb-4">
-              <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="otp"
+                className="block text-sm font-medium text-gray-700"
+              >
                 OTP
               </label>
               <input
@@ -212,7 +237,6 @@ function SignIn() {
                 required
                 className="w-full mt-1 p-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-             
             </div>
 
             <div className="flex justify-end space-x-2">
@@ -234,57 +258,65 @@ function SignIn() {
       )}
 
       {/* Modal for Reset Password */}
-     {/* Modal for Reset Password */}
-{showResetModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
-      <h3 className="text-xl font-semibold mb-4 text-black">Reset Password</h3>
+      {/* Modal for Reset Password */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
+            <h3 className="text-xl font-semibold mb-4 text-black">
+              Reset Password
+            </h3>
 
-      <div className="mb-4">
-        <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
-          New Password
-        </label>
-        <input
-          type="password"
-          id="newPassword"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          required
-          className="w-full mt-1 p-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
+            <div className="mb-4">
+              <label
+                htmlFor="newPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
+                New Password
+              </label>
+              <input
+                type="password"
+                id="newPassword"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                className="w-full mt-1 p-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-      <div className="mb-4">
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-          Confirm Password
-        </label>
-        <input
-          type="password"
-          id="confirmPassword"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          className="w-full mt-1 p-2 border text-black border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
+            <div className="mb-4">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="w-full mt-1 p-2 border text-black border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-      <div className="flex justify-end space-x-2">
-        <button
-          className="py-2 px-4 bg-gray-500 text-white rounded-md"
-          onClick={() => setShowResetModal(false)}
-        >
-          Cancel
-        </button>
-        <button
-          className="py-2 px-4 bg-green-500 text-white rounded-md"
-          onClick={handleResetPassword}
-        >
-          Reset Password
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            <div className="flex justify-end space-x-2">
+              <button
+                className="py-2 px-4 bg-gray-500 text-white rounded-md"
+                onClick={() => setShowResetModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="py-2 px-4 bg-green-500 text-white rounded-md"
+                onClick={handleResetPassword}
+              >
+                Reset Password
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,50 +1,206 @@
-import React from 'react'
-import Table from 'react-bootstrap/Table';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useEffect, useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Table, Button, Modal, Form, Pagination } from "react-bootstrap";
+import { getAllSiteMasters } from "../Api/SiteApi/SiteApi";
+import { getAllPaidOrUnPaidBillAmountByDate } from "../Api/BillApi/BillApi";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  setUnPaidBill,
+  setLoading,
+  setError,
+} from "../redux/Features/UnpaidBillSlice";
 function Others() {
+  const dispatch = useDispatch();
+  const { bill, status, error } = useSelector((state) => state.unPaidBill);
+  const { token } = useSelector((state) => state.login);
+  const cred = useSelector((state) => state.Cred);
+  const [siteMaster, setSiteMaster] = useState();
+  const [siteId, setSiteId] = useState("");
+
+  let date = new Date();
+  let fromDate = new Date(date.getFullYear(), date.getMonth());
+  let endDate = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate() + 1
+  );
+
+  const [pagination, setPagination] = useState({
+    page: 0,
+    pageSize: 10,
+    totalPages: 1,
+    sortBy: "createdTime",
+    sortDirection: "desc",
+  });
+
+  const payLoadData = {
+    siteId: siteId,
+    builderId: cred.id,
+    startDate: fromDate.toISOString(),
+    endDate: endDate.toISOString(),
+    paid: false,
+  };
+  // console.log(payLoadData);
+  // console.log(siteId);
+
+  const getUnPaidBill = async () => {
+    try {
+      dispatch(setLoading());
+      const resp = await getAllPaidOrUnPaidBillAmountByDate(
+        token,
+        payLoadData,
+        pagination.page,
+        pagination.pageSize,
+        pagination.sortBy,
+        pagination.sortDirection
+      );
+      // console.log(resp);
+      dispatch(setUnPaidBill(resp.content || []));
+
+      setPagination((prev) => ({
+        ...prev,
+        totalPages: resp.totalPages || 1,
+      }));
+      // console.log(resp);
+    } catch (error) {
+      dispatch(setError(error.message));
+    }
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setPagination((prev) => ({ ...prev, page: pageNumber }));
+  };
+
+  useEffect(() => {
+    // console.log("checking");
+    getUnPaidBill();
+  }, [pagination.page, siteId]);
+  // console.log(bill);
+
+  const getAllSite = async () => {
+    try {
+      const response = await getAllSiteMasters(cred.id);
+      setSiteMaster(response.content);
+    } catch (error) {}
+  };
+  useEffect(() => {
+    getAllSite();
+  }, []);
+  // console.log(siteMaster);
+
+  const handleSiteChange = (event) => {
+    const selectedId = parseInt(event.target.value, 10);
+    setSiteId(selectedId);
+  };
+  // console.log(siteId);
+
   return (
-    
-      <div className='w-full bg-slate-700 pt-20 px-8'>
-      <div className='flex justify-between items-center mb-6'>
-        <div className='w-1/2'>  {/* Width set to 50% */}
-          <h1 className='text-white ml-4'>Categories</h1>
+    <div className="w-full bg-slate-700 pt-10 px-8 mx-auto">
+      <div className="flex  justify-between items-center mb-6">
+        <div className="w-1/3 ">
+          <h1 className="text-white ml-4 text-4xl">Unpaid Bill</h1>
         </div>
-        <div className='w-1/2 flex justify-end'>  {/* Width set to 50% and button aligned right */}
-          <button className='bg-blue-800 text-white px-6 py-2 rounded mr-4'>Add</button>
+        <div className="w-1/3">
+          <Form>
+            <Form.Group controlId="selectSite">
+              <Form.Label className="text-white">Select Site</Form.Label>
+              <Form.Control
+                as="select"
+                value={siteId || ""}
+                onChange={(e) => handleSiteChange(e)}
+              >
+                <option value="" disabled>
+                  Select site
+                </option>
+                {siteMaster && siteMaster.length === 0 ? (
+                  <option disabled>No sites available</option>
+                ) : (
+                  siteMaster &&
+                  siteMaster.map((site) => (
+                    <option key={site.id} value={site.id}>
+                      {site.name}
+                    </option>
+                  ))
+                )}
+              </Form.Control>
+            </Form.Group>
+          </Form>
         </div>
       </div>
-      <Table striped bordered hover>
+      {status === "loading" && <p>Loading...</p>}
+      {error && <p style={{ color: "red" }}>Error: {error}</p>}
+      <Table striped bordered hover className="w-full">
         <thead>
           <tr>
-            <th>#</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Username</th>
+            <th>Bill Date</th>
+            <th>Bill No</th>
+            <th>Owner Name</th>
+            <th>State Name</th>
+            <th>Site Name</th>
+            <th>Service Name </th>
+            <th>Flat No </th>
+            <th>Area</th>
+            <th>Owner Email </th>
+            <th>Amount Before GST </th>
+            <th>SGST Amount</th>
+            <th>CGST Amount</th>
+            <th>IGST Amount</th>
+            <th>Amount After GST</th>
+            <th>Total Ammount</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td colSpan={2}>Larry the Bird</td>
-            <td>@twitter</td>
-          </tr>
+          {bill.map((item) => (
+            <tr key={item.id}>
+              <td>{item.billDate}</td>
+              <td>{item.billNo}</td>
+              <td>{item.ownerName}</td>
+              <td>{item.stateName}</td>
+              <td>{item.siteName}</td>
+              <td>{item.serviceName}</td>
+              <td>{item.flatNo}</td>
+              <td>{item.area}</td>
+              <td>{item.ownerEmail}</td>
+              <td>{item.amountBeforeGst}</td>
+              <td>{item.sgstAmount}</td>
+              <td>{item.cgstAmount}</td>
+              <td>{item.igstAmount}</td>
+              <td>{item.amountAfterGst}</td>
+              <td>{item.totalAmount}</td>
+            </tr>
+          ))}
         </tbody>
       </Table>
+      <Pagination className="mt-3">
+        <Pagination.First
+          onClick={() => handlePageChange(0)}
+          disabled={pagination.page === 0}
+        />
+        <Pagination.Prev
+          onClick={() => handlePageChange(pagination.page - 1)}
+          disabled={pagination.page === 0}
+        />
+        {Array.from({ length: pagination.totalPages }, (_, index) => (
+          <Pagination.Item
+            key={index}
+            active={index === pagination.page}
+            onClick={() => handlePageChange(index)}
+          >
+            {index + 1}
+          </Pagination.Item>
+        ))}
+        <Pagination.Next
+          onClick={() => handlePageChange(pagination.page + 1)}
+          disabled={pagination.page + 1 === pagination.totalPages}
+        />
+        <Pagination.Last
+          onClick={() => handlePageChange(pagination.totalPages - 1)}
+          disabled={pagination.page + 1 === pagination.totalPages}
+        />
+      </Pagination>
     </div>
-    
-  )
+  );
 }
 
-export default Others
+export default Others;
+// token: 'eyJhbGciOiJIUzUxMiJ9.eyJidWlsZGVyTmFtZSI6IlByYXZlc…NYGEYyGFuyEtE1g3FIW3om5-ES3n7xs0bRkWKHPd4YLG6-i_A'
