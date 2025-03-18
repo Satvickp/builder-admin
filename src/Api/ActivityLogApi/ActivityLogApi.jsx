@@ -26,15 +26,25 @@ export const getAllLogs = async (
   startDate,
   endDate
 ) => {
-  const url = `${baseUrl}/getAllLogs?page=${page}&size=${size}&sortOrder=${sortOrder}&sortColumn=${sortColumn}&builderId=${builderId}&startDate=${startDate}&endDate=${endDate}`;
+  const url = `${baseUrl}/getAllLogs`;
+  const data = {
+    page: page,
+    size: size,
+    sortOrder: sortOrder,
+    sortColumn: sortColumn,
+    builderId: builderId,
+    startDate: startDate,
+    endDate: endDate,
+  };
   const resp = await axios({
-    method: "GET",
+    method: "POST",
     url: url,
     headers: {
       Accept: "*/*",
       "Content-Type": "application/json",
       Authorization: "Bearer " + token,
     },
+    data: data,
   });
   return resp.data;
 };

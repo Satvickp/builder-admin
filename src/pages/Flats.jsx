@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Table, Button, Modal, FormControl, Form } from "react-bootstrap";
 import { FaEdit } from "react-icons/fa";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import ReactPaginate from "react-paginate"; // Ensure to install: npm install react-paginate
+import ReactPaginate from "react-paginate";
 import {
   setFlats,
   setLoading,
@@ -11,8 +11,8 @@ import {
   addFlat,
   updateFlat,
   selectFlats,
-  selectLoading,
-  selectError,
+  // selectLoading,
+  // selectError,
 } from "../redux/Features/FlatSlice";
 import {
   createFlatMaster,
@@ -48,8 +48,6 @@ const FlatMaster = () => {
   const cred = useSelector((state) => state.Cred);
   const [areas, setAreas] = useState([]);
   const [blocks, setBlocks] = useState([]);
-  console.log(blocks);
-  console.log(areas);
 
   const [newFlat, setNewFlat] = useState({
     flatNo: "",
@@ -69,28 +67,24 @@ const FlatMaster = () => {
 
   const [currentPage, setCurrentPage] = useState(0); // State for tracking current page
 
-  // Fetch states when stateMasters is empty
   useEffect(() => {
     if (stateMasters.length === 0) {
       fetchStates();
     }
   }, []);
 
-  // Fetch sites when a state is selected
   useEffect(() => {
     if (selectedStateId) {
       fetchSites(selectedStateId);
     }
   }, [selectedStateId]);
 
-  // Fetch flats when both site and state are selected
   useEffect(() => {
     if (selectedSiteId && selectedStateId) {
       fetchFlats(selectedSiteId, selectedStateId, currentPage);
     }
   }, [selectedSiteId, selectedStateId, currentPage]);
 
-  // Fetch states function
   const fetchStates = async () => {
     try {
       const states = await getStates(cred.id);
@@ -140,7 +134,7 @@ const FlatMaster = () => {
         setFlats({
           flats: response.content,
           totalElement: response.totalElements,
-          totalPages: response.totalPages, // Store totalPages in Redux
+          totalPages: response.totalPages,
           page: response.page,
         })
       );
@@ -164,24 +158,18 @@ const FlatMaster = () => {
     }
   };
 
-  // Fetch flats function (with pagination)
   const fetchFlats = async (siteId, stateId, page = 0) => {
     dispatch(setLoading("loading"));
     try {
-      const response = await getFlatsBySiteAndState(
-        siteId,
-        stateId,
-        cred.id,
-        page
-      );
-      dispatch(
-        setFlats({
-          flats: response.content,
-          totalElement: response.totalElement,
-          page: response.page,
-          totalPages: response.totalPages, // Update totalPages from response
-        })
-      );
+      await getFlatsBySiteAndState(siteId, stateId, cred.id, page);
+      // dispatch(
+      //   setFlats({
+      //     flats: response.content,
+      //     totalElement: response.totalElement,
+      //     page: response.page,
+      //     totalPages: response.totalPages, // Update totalPages from response
+      //   })
+      // );
     } catch (err) {
       dispatch(setError(err.message));
     } finally {
@@ -342,7 +330,6 @@ const FlatMaster = () => {
         </div>
       </div>
 
-      {/* Table */}
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -358,9 +345,6 @@ const FlatMaster = () => {
         <tbody>
           {Array.isArray(flats) && flats.length > 0 ? (
             flats.map((flat) => {
-              const site = siteMasters.find(
-                (site) => site.id === flat.siteMasterId
-              );
               return (
                 <tr key={flat.id}>
                   <td>{flat.flatNo}</td>
@@ -368,7 +352,7 @@ const FlatMaster = () => {
                   <td>{flat.area}</td>
                   <td>{flat.block}</td>
                   <td>{flat.emailId}</td>
-                  <td>{site ? site.name : "N/A"}</td>
+                  <td>{flat.siteName}</td>
                   <td>
                     <OverlayTrigger overlay={<Tooltip>Edit Flat</Tooltip>}>
                       <Button
@@ -391,33 +375,38 @@ const FlatMaster = () => {
         </tbody>
       </Table>
 
-      {/* Pagination Component */}
       {flats.length > 0 && (
-        <ReactPaginate
-          previousLabel={"← Previous"}
-          nextLabel={"Next →"}
-          pageCount={flats.totalPages}
-          onPageChange={handlePageClick}
-          containerClassName={"pagination"}
-          activeClassName={"active"}
-          previousClassName={"page-item"}
-          nextClassName={"page-item"}
-          pageClassName={"page-item"}
-          pageLinkClassName={"page-link"}
-          previousLinkClassName={"page-link"}
-          nextLinkClassName={"page-link"}
-          forcePage={currentPage}
-        />
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: "20px",
+          }}
+        >
+          <ReactPaginate
+            previousLabel={"← Previous"}
+            nextLabel={"Next →"}
+            pageCount={flats.totalPages}
+            onPageChange={handlePageClick}
+            containerClassName={"pagination"}
+            activeClassName={"active"}
+            previousClassName={"page-item"}
+            nextClassName={"page-item"}
+            pageClassName={"page-item"}
+            pageLinkClassName={"page-link"}
+            previousLinkClassName={"page-link"}
+            nextLinkClassName={"page-link"}
+            forcePage={currentPage}
+          />
+        </div>
       )}
 
-      {/* Modal for adding or editing flats */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>{isEdit ? "Edit Flat" : "Add New Flat"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form>
-            {/* State Dropdown */}
             <Form.Label>Select State</Form.Label>
             <div className="mb-3">
               <Form.Select
@@ -434,7 +423,6 @@ const FlatMaster = () => {
               </Form.Select>
             </div>
 
-            {/* Site Dropdown */}
             <Form.Label>Select Site</Form.Label>
             <div className="mb-3">
               <Form.Select
@@ -451,7 +439,6 @@ const FlatMaster = () => {
               </Form.Select>
             </div>
 
-            {/* Flat details form */}
             <div className="mb-3">
               <Form.Label>Flat No</Form.Label>
               <FormControl

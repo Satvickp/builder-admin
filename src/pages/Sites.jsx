@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Table,
@@ -216,12 +216,8 @@ const SiteMaster = () => {
                   <td>{site.name}</td>
                   <td>{site.totalUnits}</td>
                   <td>{site.flatTypes.join(", ")}</td>
-                  {/* <td>{site.blockList.join(" ,")}</td> */}
-                  <td>
-                    {stateMasters.find(
-                      (state) => state.id === site.stateMasterId
-                    )?.name || "Unknown"}
-                  </td>
+                  <td>{site.blockList.join(" ,")}</td>
+                  <td>{site.state}</td>
                   <td>
                     <OverlayTrigger
                       placement="top"
@@ -261,7 +257,7 @@ const SiteMaster = () => {
         </Table>
       </div>
 
-      <Pagination className="mt-3 justify-content-center">
+      <Pagination className="mt-3 justify-end">
         <Pagination.First
           onClick={() => handlePageChange(0)}
           disabled={pagination.page === 0}
@@ -289,7 +285,19 @@ const SiteMaster = () => {
         />
       </Pagination>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal
+        show={showModal}
+        onHide={() => {
+          setShowModal(false);
+          setNewSite({
+            name: "",
+            totalUnits: "",
+            flatTypes: [],
+            blockList: [],
+            stateMasterId: null,
+          });
+        }}
+      >
         <Modal.Header closeButton>
           <Modal.Title>
             {isEdit ? "Edit Site Master" : "Add New Site Master"}
@@ -339,7 +347,7 @@ const SiteMaster = () => {
             <Form.Group>
               <Form.Label>Flat Types</Form.Label>
               <Form.Control
-                type="text"
+                type="number"
                 name="flatTypes"
                 value={newSite.flatTypes.join(", ")}
                 onChange={(e) =>
@@ -359,13 +367,14 @@ const SiteMaster = () => {
               <Form.Control
                 type="text"
                 name="blockList"
-                value={newSite.blockList.join(", ")}
+                value={newSite.blockList.join(",")}
                 onChange={(e) =>
                   setNewSite({
                     ...newSite,
                     blockList: e.target.value
                       .split(",")
                       .map((item) => item.trim()),
+                    blockListInput: e.target.value,
                   })
                 }
                 placeholder="e.g., A, B, C"

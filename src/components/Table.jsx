@@ -1,18 +1,17 @@
-import React, { useEffect } from "react";
-import "./Style.css"; // Include your custom CSS
-import Table from "react-bootstrap/Table";
+import { useEffect } from "react";
+import "./Style.css";
 import {
-  activityLogs,
-  deleteActivityLogs,
+  // activityLogs,
+  // deleteActivityLogs,
   getAllLogs,
-  getAllLogsForBills,
+  // getAllLogsForBills,
 } from "../Api/ActivityLogApi/ActivityLogApi";
 import { useSelector, useDispatch } from "react-redux";
 import {
   setActivityLogs,
-  setAllActivityLogs,
-  setAllActivityLogsForBills,
-  deleteLogs,
+  // setAllActivityLogs,
+  // setAllActivityLogsForBills,
+  // deleteLogs,
 } from "../redux/Features/ActivityLogSlice";
 
 function ActivityStatus() {
@@ -20,9 +19,9 @@ function ActivityStatus() {
   const { token } = useSelector((state) => state.login);
   const cred = useSelector((state) => state.Cred);
   const activityLog = useSelector((state) => state.activityLog.activityLog);
-  const allActivityLogs = useSelector(
-    (state) => state.activityLog.allActivityLogs
-  );
+  // const allActivityLogs = useSelector(
+  //   (state) => state.activityLog.allActivityLogs
+  // );
   let date = new Date();
   let fromDate = new Date(date.getFullYear(), date.getMonth());
   let endDate = new Date(
@@ -52,11 +51,11 @@ function ActivityStatus() {
       fromDate.toISOString(),
       endDate.toISOString()
     );
-    console.log(resp);
+    dispatch(setActivityLogs(resp.content));
   };
   useEffect(() => {
     getAllLogsofActivityLog();
-  });
+  }, []);
 
   // const getAllLogsForBillsOfActivityLog = async () => {
   //   const resp = await getAllLogsForBills(
@@ -83,133 +82,31 @@ function ActivityStatus() {
   //   deletelogs();
   // });
 
-  const data = [
-    {
-      customerName: "John Doe",
-      activityStatus: "Completed",
-      date: "01/12/24",
-      time: "10:30 AM",
-    },
-    {
-      customerName: "Jane Smith",
-      activityStatus: "Pending",
-      date: "02/12/24",
-      time: "02:00 PM",
-    },
-    {
-      customerName: "Emily Johnson",
-      activityStatus: "In Progress",
-      date: "03/12/24",
-      time: "11:15 AM",
-    },
-  ];
   return (
     <div className="activity-status-container">
       <h3 className="table-title">Activity Status</h3>
       <div className="bg-slate-600 max-w-2xl pl-4 text-white rounded-md py-4 overflow-y-scroll overflow-x-auto h-[600px] scroll-smooth">
+        <div className="text-lg grid grid-cols-[1fr_1fr_1fr_1fr] gap-4 px-2 py-2 font-bold border-b border-white">
+          <span>Resource ID</span>
+          <span>Log Type</span>
+          <span>Log Date</span>
+          <span>Log Time</span>
+        </div>
         <ul>
-          {data.map((activity, index) => (
+          {activityLog.map((activity, index) => (
             <li key={index}>
-              <div className="text-lg grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 px-2 py-2 ">
-                <span>{activity.customerName}</span>
-                <span>{activity.activityStatus}</span>
-                <span>{activity.date}</span>
-                <span>{activity.time}</span>
+              <div className="text-lg grid grid-cols-[1fr_1fr_1fr_1fr] gap-4 px-2 py-2 ">
+                <span>{activity.resourceId}</span>
+                <span>{activity.logType}</span>
+                <span>{activity.logDate}</span>
+                <span>{activity.logTime}</span>
               </div>
             </li>
           ))}
         </ul>
       </div>
-      {/* <Table striped bordered hover className="activity-table">
-        <thead>
-          <tr>
-            <th>Activity</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Customer Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Update taskbar</td>
-            <td>12/12/2024</td>
-            <td>4:30pm</td>
-            <td>Ramesh Kumar</td>
-          </tr>
-          <tr>
-          <td>Update taskbar</td>
-            <td>12/12/2024</td>
-            <td>4:30pm</td>
-            <td>Ramesh Kumar</td>
-          </tr>
-          <tr>
-          <td>Update taskbar</td>
-            <td>12/12/2024</td>
-            <td>4:30pm</td>
-            <td>Ramesh Kumar</td>
-          </tr>
-          <tr>
-          <td>Update taskbar</td>
-            <td>12/12/2024</td>
-            <td>4:30pm</td>
-            <td>Ramesh Kumar</td>
-          </tr>
-          <tr>
-          <td>Update taskbar</td>
-            <td>12/12/2024</td>
-            <td>4:30pm</td>
-            <td>Ramesh Kumar</td>
-          </tr>
-         
-        </tbody>
-      </Table> */}
     </div>
   );
 }
 
 export default ActivityStatus;
-
-// const ActivityStatus = () => {
-//   // Data for activity logs
-//   const activityData = [
-//     { status: 'green', activity: 'Update taskbar', date: '12/12/2024', time: '4:30 pm', customer: 'Ramesh Kumar' },
-//     { status: 'green', activity: 'Update taskbar', date: '12/12/2024', time: '4:30 pm', customer: 'Ramesh Kumar' },
-//     { status: 'red', activity: 'Update taskbar', date: '12/12/2024', time: '4:30 pm', customer: 'Ramesh Kumar' },
-//     { status: 'yellow', activity: 'Update taskbar', date: '12/12/2024', time: '4:30 pm', customer: 'Ramesh Kumar' },
-//   ];
-
-//   return (
-//     <div className='top'>
-//     <div className="activity-status-container">
-//       {/* <div className="activity-header"> */}
-//         <h3>Activity Status</h3>
-//         <span className="sync-btn">🔄 Sync</span>
-//       {/* </div> */}
-//       <table className="activity-table">
-//         <thead>
-//           <tr>
-//             <th>Activity</th>
-//             <th>Date</th>
-//             <th>Time</th>
-//             <th>Customer Name</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {activityData.map((item, index) => (
-//             <tr key={index}>
-//               <td>
-//                 <span className={`status-dot ${item.status}`}></span> {item.activity}
-//               </td>
-//               <td>{item.date}</td>
-//               <td>{item.time}</td>
-//               <td>{item.customer}</td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//     </div>
-//   );
-// };
-
-// export default ActivityStatus;
