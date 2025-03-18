@@ -204,7 +204,7 @@ const SiteMaster = () => {
               <th>Site</th>
               <th>Total Units</th>
               <th>Flat Types</th>
-              <th>Block List</th>
+{/*               <th>Block List</th> */}
               <th>State</th>
               <th>Actions</th>
             </tr>
