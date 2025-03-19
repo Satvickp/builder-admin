@@ -18,7 +18,7 @@ function Header({ OpenSidebar }) {
   const handleLogout = () => {
     localStorage.removeItem("USER_TOKEN");
     dispatch(setUser(null));
-    navigate("/signin", { replace: true });
+    navigate("/", { replace: true });
   };
 
   return (

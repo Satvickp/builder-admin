@@ -204,7 +204,7 @@ const SiteMaster = () => {
               <th>Site</th>
               <th>Total Units</th>
               <th>Flat Types</th>
-{/*               <th>Block List</th> */}
+              <th>Block List</th>
               <th>State</th>
               <th>Actions</th>
             </tr>
@@ -257,7 +257,8 @@ const SiteMaster = () => {
         </Table>
       </div>
 
-      <Pagination className="mt-3 justify-end">
+      {
+       data.length > 0 && <Pagination className="mt-3 justify-end">
         <Pagination.First
           onClick={() => handlePageChange(0)}
           disabled={pagination.page === 0}
@@ -283,7 +284,7 @@ const SiteMaster = () => {
           onClick={() => handlePageChange(pagination.totalPages - 1)}
           disabled={pagination.page + 1 === pagination.totalPages}
         />
-      </Pagination>
+      </Pagination>}
 
       <Modal
         show={showModal}
