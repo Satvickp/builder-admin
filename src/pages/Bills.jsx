@@ -1,58 +1,61 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Table, Button, Modal, Form } from 'react-bootstrap';
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Table, Button, Modal, Form } from "react-bootstrap";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
 import {
   addBill,
   setError,
   setLoading,
   setBills,
-} from '../redux/Features/BillSlice';
+} from "../redux/Features/BillSlice";
 import {
   createBillsInBulkWithoutFlatId,
   createBillsWithFlatId,
   deleteBill as apiDeleteBill,
   markBillAsPaid,
   markBillAsUnpaid,
-} from '../Api/BillApi/BillApi';
-import { sendBillInBulk } from '../Api/BillApi/BillApi';
-import { getStates } from '../Api/stateapi/stateMasterApi';
-import { setStateMasters } from '../redux/Features/stateMasterSlice';
-import { getAllSiteMastersByState } from '../Api/SiteApi/SiteApi';
-import { setSiteMasters } from '../redux/Features/siteMasterSlice';
-import { getFlatsBySiteAndState } from '../Api/FlatApi/FlatApi';
-import { setFlats } from '../redux/Features/FlatSlice';
-import { getAllServiceMasters } from '../Api/ServicesApi/ServiceApi';
-import { setServiceMasters } from '../redux/Features/ServiceSlice';
-import { getPendingBillsBySiteId, getAllPaidBillsBySiteId } from '../Api/BillApi/BillApi';
+} from "../Api/BillApi/BillApi";
+import { sendBillInBulk } from "../Api/BillApi/BillApi";
+import { getStates } from "../Api/stateapi/stateMasterApi";
+import { setStateMasters } from "../redux/Features/stateMasterSlice";
+import { getAllSiteMastersByState } from "../Api/SiteApi/SiteApi";
+import { setSiteMasters } from "../redux/Features/siteMasterSlice";
+import { getFlatsBySiteAndState } from "../Api/FlatApi/FlatApi";
+import { setFlats } from "../redux/Features/FlatSlice";
+import { getAllServiceMasters } from "../Api/ServicesApi/ServiceApi";
+import { setServiceMasters } from "../redux/Features/ServiceSlice";
+import {
+  getPendingBillsBySiteId,
+  getAllPaidBillsBySiteId,
+} from "../Api/BillApi/BillApi";
 
 const BillManager = () => {
   const dispatch = useDispatch();
   const bills = useSelector((state) => state.bills.bills);
   const loading = useSelector((state) => state.bills.loading);
   const error = useSelector((state) => state.bills.error);
-  const stateMasters = useSelector((state) => state.stateMaster.stateMasters) || [];
+  const stateMasters =
+    useSelector((state) => state.stateMaster.stateMasters) || [];
   const siteMasters = useSelector((state) => state.siteMaster.data) || [];
   const flats = useSelector((state) => state.flat.flats || []);
   const services = useSelector((state) => state.serviceMasters.services) || [];
   const cred = useSelector((state) => state.Cred);
-  //  console.log(bills);
-  const [showModal, setShowModal] = useState(false); // For first modal
-  const [showSecondModal, setShowSecondModal] = useState(false); // For second modal
+  const [showModal, setShowModal] = useState(false);
+  const [showSecondModal, setShowSecondModal] = useState(false);
   const [newBill, setNewBill] = useState({
-    stateId: '',
-    siteId: '',
-    serviceId: '',
+    stateId: "",
+    siteId: "",
+    serviceId: "",
   });
   const [showFlatSelectionModal, setShowFlatSelectionModal] = useState(false);
   const [addedEntries, setAddedEntries] = useState([]);
   const [newBillSecond, setNewBillSecond] = useState({
-    stateId: '',
-    siteId: '',
+    stateId: "",
+    siteId: "",
     flatId: [],
-    serviceId: '',
+    serviceId: "",
   });
 
   const [pendingBills, setPendingBills] = useState([]);
@@ -81,7 +84,7 @@ const BillManager = () => {
     dispatch(setLoading(true));
     try {
       const response = await getAllSiteMastersByState(stateId, cred.id);
-      console.log('hello',response);
+      console.log("hello", response);
       dispatch(setSiteMasters(response.data));
     } catch (err) {
       dispatch(setError("Failed to load sites."));
@@ -94,11 +97,13 @@ const BillManager = () => {
     dispatch(setLoading(true));
     try {
       const response = await getFlatsBySiteAndState(siteId, stateId, cred.id);
-      dispatch(setFlats({
-        flats: response.content,
-        totalElement: response.totalElement,
-        page: response.page,
-      }));
+      dispatch(
+        setFlats({
+          flats: response.content,
+          totalElement: response.totalElement,
+          page: response.page,
+        })
+      );
     } catch (err) {
       dispatch(setError("Failed to load flats."));
     } finally {
@@ -106,26 +111,23 @@ const BillManager = () => {
     }
   };
 
-
-  useEffect(() => {
-    if (newBill.siteId && cred.id) {
-      fetchPendingBills(newBill.siteId, cred.id);
-    }
-  }, [newBill.siteId, cred.id]);
-
   const fetchPendingBills = async (siteId, builderId) => {
     dispatch(setLoading(true));
     try {
       const response = await getPendingBillsBySiteId(siteId, builderId);
-      console.log('Fetched Pending Bills:', response.data);
+      console.log("Fetched Pending Bills:", response.data);
       setPendingBills(response.data);
+      dispatch(setBills(response.data));
     } catch (error) {
-      dispatch(setError('Failed to fetch pending bills.'));
+      dispatch(setError("Failed to fetch pending bills."));
     } finally {
       dispatch(setLoading(false));
     }
   };
-
+  useEffect(() => {
+    fetchPendingBills(newBill.siteId, cred.id);
+  }, []);
+  console.log(cred);
   useEffect(() => {
     if (newBillSecond.siteId && cred.id) {
       fetchPaidBills(newBillSecond.siteId, cred.id);
@@ -136,10 +138,10 @@ const BillManager = () => {
     dispatch(setLoading(true));
     try {
       const response = await getAllPaidBillsBySiteId(siteId, builderId);
-      console.log('Fetched Paid Bills:', response.data);
+      console.log("Fetched Paid Bills:", response.data);
       setPaidBills(response.data);
     } catch (error) {
-      dispatch(setError('Failed to fetch paid bills.'));
+      dispatch(setError("Failed to fetch paid bills."));
     } finally {
       dispatch(setLoading(false));
     }
@@ -155,16 +157,17 @@ const BillManager = () => {
   }, [newBill.stateId, newBillSecond.stateId]);
 
   useEffect(() => {
-    if (newBillSecond.siteId && newBillSecond.stateId) fetchFlats(newBillSecond.stateId, newBillSecond.siteId);
+    if (newBillSecond.siteId && newBillSecond.stateId)
+      fetchFlats(newBillSecond.stateId, newBillSecond.siteId);
   }, [newBillSecond.siteId, newBillSecond.stateId]);
 
-  const   openModal = () => setShowModal(true);
+  const openModal = () => setShowModal(true);
   const closeModal = () => {
     setShowModal(false);
     setNewBill({
-      stateId: '',
-      siteId: '',
-      serviceId: '',
+      stateId: "",
+      siteId: "",
+      serviceId: "",
     });
   };
 
@@ -172,10 +175,10 @@ const BillManager = () => {
   const closeSecondModal = () => {
     setShowSecondModal(false);
     setNewBillSecond({
-      stateId: '',
-      siteId: '',
-      flatId: '',
-      serviceId: '',
+      stateId: "",
+      siteId: "",
+      flatId: "",
+      serviceId: "",
     });
   };
 
@@ -183,26 +186,24 @@ const BillManager = () => {
     const { name, value, type, checked } = e.target;
     setNewBill({
       ...newBill,
-      [name]: type === 'checkbox' ? checked : (value ? Number(value) : ''),
+      [name]: type === "checkbox" ? checked : value ? Number(value) : "",
     });
   };
 
-
-const handleFlatSelection = (flatId, isChecked) => {
-  setNewBillSecond((prev) => ({
-    ...prev,
-    flatId: isChecked
-      ? [...prev.flatId, flatId] // Add selected flat ID
-      : prev.flatId.filter((id) => id !== flatId), // Remove deselected flat ID
-  }));
-};
- 
+  const handleFlatSelection = (flatId, isChecked) => {
+    setNewBillSecond((prev) => ({
+      ...prev,
+      flatId: isChecked
+        ? [...prev.flatId, flatId]
+        : prev.flatId.filter((id) => id !== flatId),
+    }));
+  };
 
   const handleSecondModalInputChange = (e) => {
     const { name, value } = e.target;
     setNewBillSecond({
       ...newBillSecond,
-      [name]: value ? Number(value) : '', // Parse numeric values
+      [name]: value ? Number(value) : "",
     });
   };
 
@@ -210,23 +211,21 @@ const handleFlatSelection = (flatId, isChecked) => {
     const newEntries = newBillSecond.flatId.map((flatId) => ({
       stateId: newBillSecond.stateId,
       siteId: newBillSecond.siteId,
-      flatId, // Each selected flat
+      flatId,
       serviceId: newBillSecond.serviceId,
     }));
 
     setAddedEntries((prev) => [...prev, ...newEntries]);
 
-    // Optionally reset form fields after adding
     setNewBillSecond((prev) => ({
       ...prev,
-      flatId: [], // Reset selected flats
+      flatId: [],
     }));
   };
 
   const handleRemoveEntry = (index) => {
     setAddedEntries((prev) => prev.filter((_, i) => i !== index));
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -236,18 +235,16 @@ const handleFlatSelection = (flatId, isChecked) => {
         ...newBill,
         builderId: cred.id,
       });
-      console.log('create bill ',response)
-      response.data.map((e)=> dispatch(addBill(e)))
-      fetchPendingBills(newBill.siteId, cred.id);
+      console.log("create bill ", response);
+      response.data.map((e) => dispatch(addBill(e)));
+      // fetchPendingBills(newBill.siteId, cred.id);
       closeModal();
     } catch (err) {
-      dispatch(setError('Failed to create bill.'));
+      dispatch(setError("Failed to create bill."));
     } finally {
       dispatch(setLoading(false));
     }
   };
-
-
 
   const handleSubmitSecond = async (e) => {
     e.preventDefault();
@@ -255,7 +252,6 @@ const handleFlatSelection = (flatId, isChecked) => {
 
     try {
       const billReqList = addedEntries.map((entry) => ({
-
         stateId: entry.stateId || 0,
         siteId: entry.siteId || 0,
         flatId: entry.flatId || 0,
@@ -267,7 +263,7 @@ const handleFlatSelection = (flatId, isChecked) => {
       };
       const response = await createBillsWithFlatId(requestData);
       console.log("Bill creation response:", response);
-      response.data.map((e)=> dispatch(addBill(e)))
+      response.data.map((e) => dispatch(addBill(e)));
       fetchPaidBills(newBillSecond.siteId, cred.id);
       closeSecondModal();
     } catch (err) {
@@ -278,36 +274,40 @@ const handleFlatSelection = (flatId, isChecked) => {
     }
   };
 
-
-
   const handleDeleteBill = async (id) => {
     try {
       await apiDeleteBill(id);
       dispatch(setBills(bills.filter((bill) => bill.id !== id)));
     } catch (err) {
-      dispatch(setError('Failed to delete bill.'));
+      dispatch(setError("Failed to delete bill."));
     }
   };
 
   const handleMarkAsPaid = async (id) => {
     try {
       await markBillAsPaid(id);
-      dispatch(setBills(bills.map((bill) =>
-        bill.id === id ? { ...bill, paid: true } : bill
-      )));
+      dispatch(
+        setBills(
+          bills.map((bill) => (bill.id === id ? { ...bill, paid: true } : bill))
+        )
+      );
     } catch (err) {
-      dispatch(setError('Failed to mark bill as paid.'));
+      dispatch(setError("Failed to mark bill as paid."));
     }
   };
 
   const handleMarkAsUnpaid = async (id) => {
     try {
       await markBillAsUnpaid(id);
-      dispatch(setBills(bills.map((bill) =>
-        bill.id === id ? { ...bill, paid: false } : bill
-      )));
+      dispatch(
+        setBills(
+          bills.map((bill) =>
+            bill.id === id ? { ...bill, paid: false } : bill
+          )
+        )
+      );
     } catch (err) {
-      dispatch(setError('Failed to mark bill as unpaid.'));
+      dispatch(setError("Failed to mark bill as unpaid."));
     }
   };
 
@@ -316,46 +316,40 @@ const handleFlatSelection = (flatId, isChecked) => {
     return date.toLocaleDateString();
   };
 
-
-  
-
-
   const handleSendBillsInBulk = async () => {
     try {
       if (!bills.length) {
         alert("No bills available to send in bulk.");
         return;
       }
-  
+
       const generatePDF = () => {
         const doc = new jsPDF({ orientation: "landscape" });
         doc.autoTable({
-          html: "#my-table", 
+          html: "#my-table",
         });
         const pdfOutput = doc.output();
-        return btoa(pdfOutput); 
+        return btoa(pdfOutput);
       };
-  
+
       const pdfData = generatePDF();
-      console.log('llll',pdfData)
-  
+      console.log("llll", pdfData);
+
       const bulkBillSendReqList = bills.map((bill) => ({
-        email: bill.ownerEmail, 
+        email: bill.ownerEmail,
         billBase64Url: `${pdfData}`,
       }));
-      console.log('rrr',bulkBillSendReqList);
+      console.log("rrr", bulkBillSendReqList);
 
-      const response = await sendBillInBulk(bulkBillSendReqList); 
+      const response = await sendBillInBulk(bulkBillSendReqList);
       console.log("Bulk Send Response:", response);
-  
+
       setBulkBillSendStatus("Bills sent successfully!");
     } catch (error) {
       console.error("Error sending bills in bulk:", error);
       setBulkBillSendStatus("Failed to send bills in bulk.");
     }
   };
-  
-
 
   // const exportPDF = () => {
   //   const doc = new jsPDF({ orientation: "landscape" });
@@ -365,14 +359,11 @@ const handleFlatSelection = (flatId, isChecked) => {
   //   doc.save("data.pdf");
   //   var out = doc.output()
 
-  //   var url ='data:application/pdf;base64,'+ btoa(out); 
+  //   var url ='data:application/pdf;base64,'+ btoa(out);
   //   console.log('base64',url)
   // };
-  
 
-
-
-
+  console.log(bills);
   return (
     <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -390,7 +381,14 @@ const handleFlatSelection = (flatId, isChecked) => {
       {error && <p className="text-red-500">Error: {error}</p>}
 
       <div className="table-container bg-white">
-        <Table responsive striped bordered hover variant="dark" className="table">
+        <Table
+          responsive
+          striped
+          bordered
+          hover
+          variant="dark"
+          className="table"
+        >
           <thead>
             <tr>
               <th>Bill Date</th>
@@ -428,7 +426,7 @@ const handleFlatSelection = (flatId, isChecked) => {
                 <td>{bill.cgstAmount}</td>
                 <td>{bill.igstAmount}</td>
                 <td>{bill.amountAfterGst}</td>
-                <td>{bill.paid ? 'Paid' : 'Unpaid'}</td>
+                <td>{bill.paid ? "Paid" : "Unpaid"}</td>
                 <td>
                   <Button
                     variant="success"
@@ -458,14 +456,14 @@ const handleFlatSelection = (flatId, isChecked) => {
       </div>
 
       <div className="mt-4 sm:mt-6 flex justify-center sm:justify-start">
-    <Button variant="success" onClick={handleSendBillsInBulk}>
-      Send Bills in Bulk
-    </Button>
-  </div>
+        <Button variant="success" onClick={handleSendBillsInBulk}>
+          Send Bills in Bulk
+        </Button>
+      </div>
 
-  {bulkBillSendStatus && (
-    <p className="text-white mt-4">{bulkBillSendStatus}</p>
-  )}
+      {bulkBillSendStatus && (
+        <p className="text-white mt-4">{bulkBillSendStatus}</p>
+      )}
 
       {/* First Modal for Adding Bills */}
       <Modal show={showModal} onHide={closeModal}>
@@ -524,8 +522,10 @@ const handleFlatSelection = (flatId, isChecked) => {
                 ))}
               </Form.Control>
             </Form.Group>
-            <div className='mt-4'>
-              <Button variant="primary" type="submit">Create Bills</Button>
+            <div className="mt-4">
+              <Button variant="primary" type="submit">
+                Create Bills
+              </Button>
             </div>
           </Form>
         </Modal.Body>
@@ -581,7 +581,7 @@ const handleFlatSelection = (flatId, isChecked) => {
               >
                 {newBillSecond.flatId.length > 0
                   ? `${newBillSecond.flatId.length} Flats Selected`
-                  : 'Select Flats'}
+                  : "Select Flats"}
               </Button>
 
               {/* Modal for Flat Selection */}
@@ -594,7 +594,7 @@ const handleFlatSelection = (flatId, isChecked) => {
                   <Modal.Title>Select Flats</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                  <div style={{ maxHeight: "200px", overflowY: "auto" }}>
                     {flats.map((flat) => (
                       <Form.Check
                         key={flat.id}
@@ -602,7 +602,9 @@ const handleFlatSelection = (flatId, isChecked) => {
                         id={`flat-checkbox-${flat.id}`}
                         label={flat.flatNo}
                         checked={newBillSecond.flatId.includes(flat.id)}
-                        onChange={(e) => handleFlatSelection(flat.id, e.target.checked)}
+                        onChange={(e) =>
+                          handleFlatSelection(flat.id, e.target.checked)
+                        }
                       />
                     ))}
                   </div>
@@ -623,8 +625,6 @@ const handleFlatSelection = (flatId, isChecked) => {
                 </Modal.Footer>
               </Modal>
             </Form.Group>
-
-
 
             <Form.Group controlId="serviceId">
               <Form.Label>Service</Form.Label>
@@ -665,13 +665,17 @@ const handleFlatSelection = (flatId, isChecked) => {
               <tbody>
                 {addedEntries.map((entry, index) => {
                   const stateName =
-                    stateMasters.find((state) => state.id === entry.stateId)?.name || "N/A";
+                    stateMasters.find((state) => state.id === entry.stateId)
+                      ?.name || "N/A";
                   const siteName =
-                    siteMasters.find((site) => site.id === entry.siteId)?.name || "N/A";
+                    siteMasters.find((site) => site.id === entry.siteId)
+                      ?.name || "N/A";
                   const flatNumber =
-                    flats.find((flat) => flat.id === entry.flatId)?.flatNo || "N/A";
+                    flats.find((flat) => flat.id === entry.flatId)?.flatNo ||
+                    "N/A";
                   const serviceName =
-                    services.find((service) => service.id === entry.serviceId)?.name || "N/A";
+                    services.find((service) => service.id === entry.serviceId)
+                      ?.name || "N/A";
 
                   return (
                     <tr key={index}>
@@ -692,7 +696,6 @@ const handleFlatSelection = (flatId, isChecked) => {
                   );
                 })}
               </tbody>
-
             </Table>
             <div>
               <Button variant="primary" type="submit">

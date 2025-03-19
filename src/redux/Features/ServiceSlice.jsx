@@ -1,8 +1,8 @@
 // src/pages/redux/Features/ServiceSlice.jsx
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const serviceSlice = createSlice({
-  name: 'serviceMasters',
+  name: "serviceMasters",
   initialState: {
     services: [],
     loading: false,
@@ -10,7 +10,6 @@ const serviceSlice = createSlice({
   },
   reducers: {
     setServiceMasters(state, action) {
-      console.log(action.payload)
       state.services = action.payload;
     },
     setLoading(state, action) {

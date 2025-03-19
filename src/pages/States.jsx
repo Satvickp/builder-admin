@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Table, Button, Modal, OverlayTrigger, Tooltip } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,8 +11,12 @@ import {
   setError,
   selectStateMasters,
 } from "../redux/Features/stateMasterSlice";
-import { getStates, createState, updateState } from "../Api/stateapi/stateMasterApi";
-import { deleteState } from "../Api/stateapi/stateMasterApi";  // Import the deleteState function
+import {
+  getStates,
+  createState,
+  updateState,
+} from "../Api/stateapi/stateMasterApi";
+import { deleteState } from "../Api/stateapi/stateMasterApi"; // Import the deleteState function
 
 function States() {
   const dispatch = useDispatch();
@@ -21,7 +25,7 @@ function States() {
   const [isEdit, setIsEdit] = useState(false);
   const [currentState, setCurrentState] = useState(null);
   const [error, setErrorState] = useState("");
-  const cred = useSelector(state => state.Cred);
+  const cred = useSelector((state) => state.Cred);
 
   const [newState, setNewState] = useState({
     name: "",
@@ -48,7 +52,10 @@ function States() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewState({ ...newState, [name]: name === "origin" ? String(value) : value });
+    setNewState({
+      ...newState,
+      [name]: name === "origin" ? String(value) : value,
+    });
   };
 
   const validateStateData = (stateData) => {
@@ -77,7 +84,9 @@ function States() {
       return;
     }
 
-    const isDuplicate = stateMasters.some((state) => state.code === newState.code);
+    const isDuplicate = stateMasters.some(
+      (state) => state.code === newState.code
+    );
     if (isDuplicate && !isEdit) {
       setErrorState(`State with code "${newState.code}" already exists.`);
       return;
@@ -90,7 +99,10 @@ function States() {
         console.log("Updated state:", updatedState); // Debug API response
         dispatch(updateStateMaster(updatedState));
       } else {
-        const createdState = await createState({ ...newState, builderId: cred.id });
+        const createdState = await createState({
+          ...newState,
+          builderId: cred.id,
+        });
         console.log("Created state:", createdState); // Debug API response
         dispatch(addStateMaster(createdState));
       }
@@ -99,7 +111,10 @@ function States() {
       handleClose();
       dispatch(setLoading("succeeded"));
     } catch (error) {
-      const backendError = error.response?.data?.message || error.message || "Failed to add/update state master.";
+      const backendError =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to add/update state master.";
       console.error("Error in handleSubmit:", backendError);
       setErrorState(backendError);
       dispatch(setLoading("failed"));
@@ -150,7 +165,7 @@ function States() {
   }, [dispatch]);
 
   return (
-    <div className="container-fluid bg-slate-700 pt-20 px-1" >
+    <div className="container-fluid bg-slate-700 pt-20 px-1">
       <div className="row align-items-center mb-4">
         <div className="col-md-6 col-12">
           <h1 className="text-white text-4xl">States</h1>
@@ -189,10 +204,10 @@ function States() {
                   >
                     <Button
                       variant="link"
-                      className="p-0 text-primary"
+                      className="p-0 text-primary mr-2"
                       onClick={() => handleEdit(stateMaster)}
                     >
-                      <FaEdit size={20} />
+                      <FaEdit size={15} />
                     </Button>
                   </OverlayTrigger>
                   <OverlayTrigger
@@ -204,7 +219,7 @@ function States() {
                       className="p-0 text-danger"
                       onClick={() => handleDelete(stateMaster.id)}
                     >
-                      <FaTrash size={20} />
+                      <FaTrash size={15} />
                     </Button>
                   </OverlayTrigger>
                 </td>
@@ -216,7 +231,9 @@ function States() {
 
       <Modal show={show} onHide={handleClose} className="mt-4">
         <Modal.Header closeButton>
-          <Modal.Title>{isEdit ? "Edit State Master" : "Add State Master"}</Modal.Title>
+          <Modal.Title>
+            {isEdit ? "Edit State Master" : "Add State Master"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {error && <div className="alert alert-danger">{error}</div>}
@@ -290,34 +307,10 @@ function States() {
         </Modal.Body>
       </Modal>
     </div>
-
   );
 }
 
 export default States;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import React, { useEffect, useState } from "react";
 // import { Table, Button, Modal, OverlayTrigger, Tooltip } from "react-bootstrap";

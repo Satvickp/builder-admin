@@ -1,28 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Table, Button, Modal } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Table, Button, Modal } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
-import { setServiceMasters, setLoading, setError } from '../redux/Features/ServiceSlice';
-import { createServiceMaster, updateServiceMaster, getAllServiceMasters, deleteService } from '../Api/ServicesApi/ServiceApi';
+import {
+  setServiceMasters,
+  setLoading,
+  setError,
+} from "../redux/Features/ServiceSlice";
+import {
+  createServiceMaster,
+  updateServiceMaster,
+  getAllServiceMasters,
+  deleteService,
+} from "../Api/ServicesApi/ServiceApi";
 
 const ServiceMaster = () => {
   const dispatch = useDispatch();
-  const { services, loading, error } = useSelector((state) => state.serviceMasters);
+  const { services, loading, error } = useSelector(
+    (state) => state.serviceMasters
+  );
 
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [serviceId, setServiceId] = useState(null);
-  const cred = useSelector(state => state.Cred);
-  
+  const cred = useSelector((state) => state.Cred);
+
   const [newService, setNewService] = useState({
-    name: '',
-    saccode: '',
-    cgst: '',
-    sgst: '',
-    igst: '',
+    name: "",
+    saccode: "",
+    cgst: "",
+    sgst: "",
+    igst: "",
   });
 
   const fetchServiceMasters = async () => {
@@ -32,7 +43,7 @@ const ServiceMaster = () => {
       console.log("API Response:", response.data);
       dispatch(setServiceMasters(response.data));
     } catch (err) {
-      dispatch(setError(err.message || 'Failed to fetch service masters.'));
+      dispatch(setError(err.message || "Failed to fetch service masters."));
     } finally {
       dispatch(setLoading(false));
     }
@@ -44,11 +55,13 @@ const ServiceMaster = () => {
 
   useEffect(() => {
     if (isEdit && serviceId !== null) {
-      const serviceToEdit = services.find(service => service.id === serviceId);
+      const serviceToEdit = services.find(
+        (service) => service.id === serviceId
+      );
       if (serviceToEdit) {
         setNewService({
           name: serviceToEdit.name,
-          saccode: serviceToEdit.saccode || '',
+          saccode: serviceToEdit.saccode || "",
           cgst: serviceToEdit.cgst,
           sgst: serviceToEdit.sgst,
           igst: serviceToEdit.igst,
@@ -61,19 +74,20 @@ const ServiceMaster = () => {
     const { name, value } = e.target;
     setNewService((prev) => ({
       ...prev,
-      [name]: name === 'saccode' || name === 'name' ? value : parseFloat(value) || '', // Ensure `saccode` is treated as a string
+      [name]:
+        name === "saccode" || name === "name" ? value : parseFloat(value) || "", // Ensure `saccode` is treated as a string
     }));
   };
 
   const handleCreate = async () => {
     dispatch(setLoading(true));
     try {
-      await createServiceMaster({...newService, builderId: cred.id});
+      await createServiceMaster({ ...newService, builderId: cred.id });
       fetchServiceMasters();
       setShowModal(false);
       resetForm();
     } catch (err) {
-      dispatch(setError(err.message || 'Failed to create service.'));
+      dispatch(setError(err.message || "Failed to create service."));
     } finally {
       dispatch(setLoading(false));
     }
@@ -82,12 +96,15 @@ const ServiceMaster = () => {
   const handleUpdate = async () => {
     dispatch(setLoading(true));
     try {
-      await updateServiceMaster(serviceId, newService, {...newService, builderId: cred.id});
+      await updateServiceMaster(serviceId, newService, {
+        ...newService,
+        builderId: cred.id,
+      });
       fetchServiceMasters();
       setShowModal(false);
       resetForm();
     } catch (err) {
-      dispatch(setError(err.message || 'Failed to update service.'));
+      dispatch(setError(err.message || "Failed to update service."));
     } finally {
       dispatch(setLoading(false));
     }
@@ -99,7 +116,7 @@ const ServiceMaster = () => {
       await deleteService(id);
       fetchServiceMasters(); // Re-fetch services to reflect deletion
     } catch (err) {
-      dispatch(setError(err.message || 'Failed to delete service.'));
+      dispatch(setError(err.message || "Failed to delete service."));
     } finally {
       dispatch(setLoading(false));
     }
@@ -113,7 +130,7 @@ const ServiceMaster = () => {
   };
 
   const resetForm = () => {
-    setNewService({ name: '', saccode: '', cgst: '', sgst: '', igst: '' });
+    setNewService({ name: "", saccode: "", cgst: "", sgst: "", igst: "" });
     setIsEdit(false);
     setServiceId(null);
   };
@@ -121,19 +138,24 @@ const ServiceMaster = () => {
   return (
     <div className="container-fluid bg-slate-700 pt-20 px-2.2 mx-auto">
       <div className="flex gap-3 justify-between items-center mb-6">
-        <h2 className='text-white ml-4 text-4xl'>Service</h2>
-        <Button variant="primary" onClick={() => { resetForm(); setShowModal(true); }}>
+        <h2 className="text-white ml-4 text-4xl">Service</h2>
+        <Button
+          variant="primary"
+          onClick={() => {
+            resetForm();
+            setShowModal(true);
+          }}
+        >
           Add New
         </Button>
       </div>
 
       {loading && <p>Loading...</p>}
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      {error && <p style={{ color: "red" }}>Error: {error}</p>}
 
       <Table striped bordered hover>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Name</th>
             <th>SAC Code</th>
             <th>CGST</th>
@@ -146,9 +168,8 @@ const ServiceMaster = () => {
           {services.length > 0 ? (
             services.map((service) => (
               <tr key={service.id}>
-                <td>{service.id}</td>
                 <td>{service.name}</td>
-                <td>{service.saccode || 'N/A'}</td>
+                <td>{service.saccode || "N/A"}</td>
                 <td>{service.cgst}%</td>
                 <td>{service.sgst}%</td>
                 <td>{service.igst}%</td>
@@ -159,10 +180,10 @@ const ServiceMaster = () => {
                   >
                     <Button
                       variant="link"
-                      className="p-0 text-primary"
+                      className="p-0 text-primary mr-2"
                       onClick={() => handleEdit(service)}
                     >
-                      <FaEdit size={30} />
+                      <FaEdit size={15} />
                     </Button>
                   </OverlayTrigger>
                   <OverlayTrigger
@@ -174,7 +195,7 @@ const ServiceMaster = () => {
                       className="p-0 text-danger"
                       onClick={() => handleDelete(service.id)}
                     >
-                      <FaTrash size={30} />
+                      <FaTrash size={15} />
                     </Button>
                   </OverlayTrigger>
                 </td>
@@ -182,40 +203,87 @@ const ServiceMaster = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="7" className="text-center">No service masters available.</td>
+              <td colSpan="7" className="text-center">
+                No service masters available.
+              </td>
             </tr>
           )}
         </tbody>
       </Table>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)} className='mt-40'>
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        className="mt-40"
+      >
         <Modal.Header closeButton>
-          <Modal.Title>{isEdit ? 'Edit Service Master' : 'Add New Service Master'}</Modal.Title>
+          <Modal.Title>
+            {isEdit ? "Edit Service Master" : "Add New Service Master"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form onSubmit={(e) => { e.preventDefault(); isEdit ? handleUpdate() : handleCreate(); }}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              isEdit ? handleUpdate() : handleCreate();
+            }}
+          >
             <div className="mb-3">
               <label className="form-label">Name</label>
-              <input type="text" className="form-control" name="name" value={newService.name} onChange={handleChange} required />
+              <input
+                type="text"
+                className="form-control"
+                name="name"
+                value={newService.name}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div className="mb-3">
               <label className="form-label">SAC Code</label>
-              <input type="text" className="form-control" name="saccode" value={newService.saccode} onChange={handleChange} />
+              <input
+                type="text"
+                className="form-control"
+                name="saccode"
+                value={newService.saccode}
+                onChange={handleChange}
+              />
             </div>
             <div className="mb-3">
               <label className="form-label">CGST (%)</label>
-              <input type="number" className="form-control" name="cgst" value={newService.cgst} onChange={handleChange} required />
+              <input
+                type="number"
+                className="form-control"
+                name="cgst"
+                value={newService.cgst}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div className="mb-3">
               <label className="form-label">SGST (%)</label>
-              <input type="number" className="form-control" name="sgst" value={newService.sgst} onChange={handleChange} required />
+              <input
+                type="number"
+                className="form-control"
+                name="sgst"
+                value={newService.sgst}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div className="mb-3">
               <label className="form-label">IGST (%)</label>
-              <input type="number" className="form-control" name="igst" value={newService.igst} onChange={handleChange} required />
+              <input
+                type="number"
+                className="form-control"
+                name="igst"
+                value={newService.igst}
+                onChange={handleChange}
+                required
+              />
             </div>
             <Button variant="primary" type="submit">
-              {isEdit ? 'Update Service Master' : 'Add Service Master'}
+              {isEdit ? "Update Service Master" : "Add Service Master"}
             </Button>
           </form>
         </Modal.Body>

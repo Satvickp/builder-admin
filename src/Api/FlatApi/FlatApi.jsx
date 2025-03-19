@@ -74,7 +74,7 @@ export const getAllFlats = async (
     headers: {
       Accept: "*/*",
       "Content-Type": "application/json",
-      Authorization: "Bearer " + token, // Add token to headers
+      Authorization: "Bearer " + token,
     },
     params: { page, size, sortBy, sortDirection },
   });
