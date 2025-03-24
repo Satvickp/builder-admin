@@ -15,6 +15,7 @@ import {
   verifySignupOtp,
   resetPassword,
 } from "../Api/passwordApi/PasswordApi"; // Import resetPassword
+import Swal from "sweetalert2";
 
 function SignIn() {
   const [username, setUsername] = useState("");
@@ -46,13 +47,27 @@ function SignIn() {
       const decoded = jwtDecode(token);
       dispatch(setUser(decoded));
       dispatch(loginSuccess(response.data));
+      Swal.fire({
+        icon: "success",
+        title: "Login Successful",
+        text: "Welcome back!",
+        confirmButtonText: "OK",
+        showConfirmButton: false,
+        timer: 2000,
+      });
       navigate("/");
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
         "Failed to login. Please check your credentials.";
       dispatch(loginFailure(errorMessage));
-      console.error("Error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: error.message,
+        confirmButtonText: "Try Again",
+      });
+      console.error("Error:", error.message);
     }
   };
 

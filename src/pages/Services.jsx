@@ -152,64 +152,65 @@ const ServiceMaster = () => {
 
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: "red" }}>Error: {error}</p>}
-
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>SAC Code</th>
-            <th>CGST</th>
-            <th>SGST</th>
-            <th>IGST</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {services.length > 0 ? (
-            services.map((service) => (
-              <tr key={service.id}>
-                <td>{service.name}</td>
-                <td>{service.saccode || "N/A"}</td>
-                <td>{service.cgst}%</td>
-                <td>{service.sgst}%</td>
-                <td>{service.igst}%</td>
-                <td>
-                  <OverlayTrigger
-                    placement="top"
-                    overlay={<Tooltip>Edit</Tooltip>}
-                  >
-                    <Button
-                      variant="link"
-                      className="p-0 text-primary mr-2"
-                      onClick={() => handleEdit(service)}
+      <div className="overflow-x-auto table-container bg-white rounded-lg shadow-lg">
+        <Table striped bordered hover>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>SAC Code</th>
+              <th>CGST</th>
+              <th>SGST</th>
+              <th>IGST</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {services.length > 0 ? (
+              services.map((service) => (
+                <tr key={service.id}>
+                  <td>{service.name}</td>
+                  <td>{service.saccode || "N/A"}</td>
+                  <td>{service.cgst}%</td>
+                  <td>{service.sgst}%</td>
+                  <td>{service.igst}%</td>
+                  <td>
+                    <OverlayTrigger
+                      placement="top"
+                      overlay={<Tooltip>Edit</Tooltip>}
                     >
-                      <FaEdit size={15} />
-                    </Button>
-                  </OverlayTrigger>
-                  <OverlayTrigger
-                    placement="top"
-                    overlay={<Tooltip>Delete</Tooltip>}
-                  >
-                    <Button
-                      variant="link"
-                      className="p-0 text-danger"
-                      onClick={() => handleDelete(service.id)}
+                      <Button
+                        variant="link"
+                        className="p-0 text-primary mr-2"
+                        onClick={() => handleEdit(service)}
+                      >
+                        <FaEdit size={15} />
+                      </Button>
+                    </OverlayTrigger>
+                    <OverlayTrigger
+                      placement="top"
+                      overlay={<Tooltip>Delete</Tooltip>}
                     >
-                      <FaTrash size={15} />
-                    </Button>
-                  </OverlayTrigger>
+                      <Button
+                        variant="link"
+                        className="p-0 text-danger"
+                        onClick={() => handleDelete(service.id)}
+                      >
+                        <FaTrash size={15} />
+                      </Button>
+                    </OverlayTrigger>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center">
+                  No service masters available.
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="7" className="text-center">
-                No service masters available.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </Table>
+            )}
+          </tbody>
+        </Table>
+      </div>
 
       <Modal
         show={showModal}

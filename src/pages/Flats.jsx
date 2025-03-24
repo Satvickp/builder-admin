@@ -255,6 +255,8 @@ const FlatMaster = () => {
       remark: "",
       openingBalance: 0,
     });
+    setSelectedSiteId(null);
+    setSelectedStateId(null);
   };
 
   // Handle update flat action
@@ -278,16 +280,15 @@ const FlatMaster = () => {
       dispatch(setLoading("succeeded"));
     }
   };
-
   const handleEdit = (flat) => {
     const site = siteMasters.find((site) => site.id === flat.siteMasterId);
 
     if (site) {
-      setSelectedStateId(site.stateId);
-      setSelectedSiteId(flat.siteMasterId);
       fetchAreas(flat.siteMasterId);
       fetchBlocks(flat.siteMasterId);
     }
+    setSelectedSiteId(flat.siteMasterId);
+    setSelectedStateId(flat.stateMasterId);
     setNewFlat({
       flatNo: flat.flatNo,
       ownerName: flat.ownerName,
@@ -329,52 +330,52 @@ const FlatMaster = () => {
           </Button>
         </div>
       </div>
-
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Flat No</th>
-            <th>Owner Name</th>
-            <th>Area</th>
-            <th>blocks</th>
-            <th>Email</th>
-            <th>Site</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Array.isArray(flats) && flats.length > 0 ? (
-            flats.map((flat) => {
-              return (
-                <tr key={flat.id}>
-                  <td>{flat.flatNo}</td>
-                  <td>{flat.ownerName}</td>
-                  <td>{flat.area}</td>
-                  <td>{flat.block}</td>
-                  <td>{flat.emailId}</td>
-                  <td>{flat.siteName}</td>
-                  <td>
-                    <OverlayTrigger overlay={<Tooltip>Edit Flat</Tooltip>}>
-                      <Button
-                        variant="link"
-                        className="p-0 text-primary"
-                        onClick={() => handleEdit(flat)}
-                      >
-                        <FaEdit />
-                      </Button>
-                    </OverlayTrigger>
-                  </td>
-                </tr>
-              );
-            })
-          ) : (
+      <div className="overflow-x-auto table-container bg-white rounded-lg shadow-lg">
+        <Table striped bordered hover>
+          <thead>
             <tr>
-              <td colSpan="7">No flats available</td>
+              <th>Flat No</th>
+              <th>Owner Name</th>
+              <th>Area</th>
+              <th>blocks</th>
+              <th>Email</th>
+              <th>Site</th>
+              <th>Actions</th>
             </tr>
-          )}
-        </tbody>
-      </Table>
-
+          </thead>
+          <tbody>
+            {Array.isArray(flats) && flats.length > 0 ? (
+              flats.map((flat) => {
+                return (
+                  <tr key={flat.id}>
+                    <td>{flat.flatNo}</td>
+                    <td>{flat.ownerName}</td>
+                    <td>{flat.area}</td>
+                    <td>{flat.block}</td>
+                    <td>{flat.emailId}</td>
+                    <td>{flat.siteName}</td>
+                    <td>
+                      <OverlayTrigger overlay={<Tooltip>Edit Flat</Tooltip>}>
+                        <Button
+                          variant="link"
+                          className="p-0 text-primary"
+                          onClick={() => handleEdit(flat)}
+                        >
+                          <FaEdit />
+                        </Button>
+                      </OverlayTrigger>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan="7">No flats available</td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+      </div>
       {flats.length > 0 && (
         <div
           style={{
@@ -401,7 +402,14 @@ const FlatMaster = () => {
         </div>
       )}
 
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+      <Modal
+        show={showModal}
+        onHide={() => {
+          setShowModal(false);
+          resetNewFlat();
+        }}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>{isEdit ? "Edit Flat" : "Add New Flat"}</Modal.Title>
         </Modal.Header>

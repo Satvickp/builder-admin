@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Table, Button, Modal, Form } from "react-bootstrap";
+import { Button, Modal, Form } from "react-bootstrap";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -27,9 +27,12 @@ import { setFlats } from "../redux/Features/FlatSlice";
 import { getAllServiceMasters } from "../Api/ServicesApi/ServiceApi";
 import { setServiceMasters } from "../redux/Features/ServiceSlice";
 import {
-  getPendingBillsBySiteId,
   getAllPaidBillsBySiteId,
+  getAllPaidOrUnpaidBillAmountByDateWithoutSiteId,
 } from "../Api/BillApi/BillApi";
+import Swal from "sweetalert2";
+import { FaTrash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import Table from "react-bootstrap/Table";
 
 const BillManager = () => {
   const dispatch = useDispatch();
@@ -58,9 +61,42 @@ const BillManager = () => {
     serviceId: "",
   });
 
-  const [pendingBills, setPendingBills] = useState([]);
   const [paidBills, setPaidBills] = useState([]);
-  const [bulkBillSendStatus, setBulkBillSendStatus] = useState(null);
+  const [paidStatus, setPaidStatus] = useState(true);
+
+  const getAllBill = async () => {
+    const currentDate = new Date();
+    const lastYearDate = new Date(currentDate);
+    lastYearDate.setFullYear(currentDate.getFullYear() - 1);
+
+    const data = {
+      page: 1,
+      size: 50,
+      sortOrder: "ASC",
+      sortColumn: "createdTime",
+      siteId: null,
+      builderId: cred.id,
+      startDate: lastYearDate.toISOString(),
+      endDate: currentDate.toISOString(),
+      paid: paidStatus,
+    };
+
+    try {
+      const resp = await getAllPaidOrUnpaidBillAmountByDateWithoutSiteId(data);
+      dispatch(setBills(resp.content));
+    } catch (error) {
+      console.error("Error fetching bills:", error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Failed to fetch bills. Please try again later.",
+      });
+    }
+  };
+  useEffect(() => {
+    getAllBill();
+  }, [paidStatus]);
 
   const fetchStates = async () => {
     try {
@@ -111,23 +147,6 @@ const BillManager = () => {
     }
   };
 
-  const fetchPendingBills = async (siteId, builderId) => {
-    dispatch(setLoading(true));
-    try {
-      const response = await getPendingBillsBySiteId(siteId, builderId);
-      console.log("Fetched Pending Bills:", response.data);
-      setPendingBills(response.data);
-      dispatch(setBills(response.data));
-    } catch (error) {
-      dispatch(setError("Failed to fetch pending bills."));
-    } finally {
-      dispatch(setLoading(false));
-    }
-  };
-  useEffect(() => {
-    fetchPendingBills(newBill.siteId, cred.id);
-  }, []);
-  console.log(cred);
   useEffect(() => {
     if (newBillSecond.siteId && cred.id) {
       fetchPaidBills(newBillSecond.siteId, cred.id);
@@ -237,7 +256,6 @@ const BillManager = () => {
       });
       console.log("create bill ", response);
       response.data.map((e) => dispatch(addBill(e)));
-      // fetchPendingBills(newBill.siteId, cred.id);
       closeModal();
     } catch (err) {
       dispatch(setError("Failed to create bill."));
@@ -319,151 +337,183 @@ const BillManager = () => {
   const handleSendBillsInBulk = async () => {
     try {
       if (!bills.length) {
-        alert("No bills available to send in bulk.");
+        Swal.fire({
+          icon: "warning",
+          title: "No Bills Available",
+          text: "No bills available to send in bulk.",
+        });
         return;
       }
 
-      const generatePDF = () => {
-        const doc = new jsPDF({ orientation: "landscape" });
+      const generatePDF = (bill) => {
+        const doc = new jsPDF();
+        doc.setFontSize(18);
+        const text = "Bill Details";
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const textWidth = doc.getTextWidth(text);
+        const x = (pageWidth - textWidth) / 2;
+        doc.text(text, x, 20);
+        doc.setFontSize(14);
+        doc.text(`Owner Name: ${bill.ownerName}`, 14, 40);
+        doc.text(`Owner Email: ${bill.ownerEmail}`, 14, 50);
+        doc.text(`Flat No: ${bill.flatNo}`, 14, 60);
+        doc.text(`Site Name: ${bill.siteName}`, 14, 70);
+        doc.text(`State Name: ${bill.stateName}`, 14, 80);
+
+        const tableData = [
+          ["Bill Date", bill.billDate],
+          ["Bill No", bill.billNo],
+          ["Service Name", bill.serviceName],
+          ["SGST Amount", bill.sgstAmount],
+          ["IGST Amount", bill.igstAmount],
+          ["CGST Amount", bill.cgstAmount],
+          ["Amount Before GST", bill.amountBeforeGst],
+          ["Amount After GST", bill.amountAfterGst],
+          ["Rate", bill.rate],
+          ["Total Amount", bill.totalAmount],
+          ["Paid", bill.paid ? "Yes" : "No"],
+        ];
+
         doc.autoTable({
-          html: "#my-table",
+          head: [["Property", "Value"]],
+          body: tableData,
+          startY: 90,
         });
-        const pdfOutput = doc.output();
-        return btoa(pdfOutput);
+
+        const pdfOutput = doc.output("arraybuffer");
+        const pdfBase64 = btoa(
+          String.fromCharCode(...new Uint8Array(pdfOutput))
+        );
+        return pdfBase64;
       };
 
-      const pdfData = generatePDF();
-      console.log("llll", pdfData);
+      const bulkBillSendReqList = bills.map((bill) => {
+        const pdfData = generatePDF(bill);
+        return {
+          email: bill.ownerEmail,
+          billBase64Url: pdfData,
+        };
+      });
 
-      const bulkBillSendReqList = bills.map((bill) => ({
-        email: bill.ownerEmail,
-        billBase64Url: `${pdfData}`,
-      }));
-      console.log("rrr", bulkBillSendReqList);
-
-      const response = await sendBillInBulk(bulkBillSendReqList);
-      console.log("Bulk Send Response:", response);
-
-      setBulkBillSendStatus("Bills sent successfully!");
+      await sendBillInBulk(bulkBillSendReqList);
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Bills sent successfully!",
+      });
     } catch (error) {
       console.error("Error sending bills in bulk:", error);
-      setBulkBillSendStatus("Failed to send bills in bulk.");
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "Failed to send bills in bulk.",
+      });
     }
   };
 
-  // const exportPDF = () => {
-  //   const doc = new jsPDF({ orientation: "landscape" });
-  //   doc.autoTable({
-  //     html: "#my-table",
-  //   });
-  //   doc.save("data.pdf");
-  //   var out = doc.output()
+  const handleFilterChange = (e) => {
+    const selectedFilter = e.target.value === "true";
+    setPaidStatus(selectedFilter);
 
-  //   var url ='data:application/pdf;base64,'+ btoa(out);
-  //   console.log('base64',url)
-  // };
+    console.log(selectedFilter);
+  };
 
-  console.log(bills);
   return (
-    <div className="w-full bg-slate-700 pt-20 px-8 mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-white text-4xl">Bill Manager</h2>
-        <div className="flex gap-4">
+    <div className="w-full bg-slate-700 pt-10 px-4 md:px-8 mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+        <h2 className="text-white text-3xl md:text-4xl">Bill Manager</h2>
+        <div className="flex gap-4 mt-4 md:mt-0">
+          <select
+            className="px-4 py-2 border border-gray-300 rounded-md"
+            value={String(paidStatus)}
+            onChange={handleFilterChange}
+          >
+            <option value="true">Paid Bills</option>
+            <option value="false">Unpaid Bills</option>
+          </select>
           <Button variant="primary" onClick={openModal}>
             Add Bill in Bulk
           </Button>
           <Button variant="secondary" onClick={openSecondModal}>
             Add Bill or Flats
           </Button>
+          <Button variant="success" onClick={handleSendBillsInBulk}>
+            Send Bills in Bulk
+          </Button>
         </div>
       </div>
       {loading && <p className="text-white">Loading...</p>}
       {error && <p className="text-red-500">Error: {error}</p>}
 
-      <div className="table-container bg-white">
-        <Table
-          responsive
-          striped
-          bordered
-          hover
-          variant="dark"
-          className="table"
-        >
-          <thead>
-            <tr>
-              <th>Bill Date</th>
-              <th>Bill No</th>
-              <th>Owner Name</th>
-              <th>State Name</th>
-              <th>Site Name</th>
-              <th>Flat No</th>
-              <th>Service Name</th>
-              <th>Area</th>
-              <th>Owner Email</th>
-              <th>Amount Before GST</th>
-              <th>SGST Amount</th>
-              <th>CGST Amount</th>
-              <th>IGST Amount</th>
-              <th>Amount After GST</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bills.map((bill) => (
-              <tr key={bill.id}>
-                <td>{formatDate(bill.billDate)}</td>
-                <td>{bill.billNo}</td>
-                <td>{bill.ownerName}</td>
-                <td>{bill.stateName}</td>
-                <td>{bill.siteName}</td>
-                <td>{bill.flatNo}</td>
-                <td>{bill.serviceName}</td>
-                <td>{bill.area}</td>
-                <td>{bill.ownerEmail}</td>
-                <td>{bill.amountBeforeGst}</td>
-                <td>{bill.sgstAmount}</td>
-                <td>{bill.cgstAmount}</td>
-                <td>{bill.igstAmount}</td>
-                <td>{bill.amountAfterGst}</td>
-                <td>{bill.paid ? "Paid" : "Unpaid"}</td>
-                <td>
-                  <Button
-                    variant="success"
-                    onClick={() => handleMarkAsPaid(bill.id)}
-                    disabled={bill.paid}
-                  >
-                    Paid
-                  </Button>
-                  <Button
-                    variant="danger"
-                    onClick={() => handleMarkAsUnpaid(bill.id)}
-                    disabled={!bill.paid}
-                  >
-                    Unpaid
-                  </Button>
-                  <Button
-                    variant="danger"
-                    onClick={() => handleDeleteBill(bill.id)}
-                  >
-                    Delete
-                  </Button>
-                </td>
+      <div className="overflow-x-auto table-container bg-white rounded-lg shadow-lg">
+        <div className="min-w-[1200px]">
+          <Table striped responsive bordered hover className="w-full">
+            <thead>
+              <tr>
+                <th>Bill Date</th>
+                <th>Bill No</th>
+                <th>Owner Name</th>
+                <th>State Name</th>
+                <th>Site Name</th>
+                <th>Flat No</th>
+                <th>Service Name</th>
+                <th>Area</th>
+                <th>Amount Before GST</th>
+                <th>SGST Amount</th>
+                <th>CGST Amount</th>
+                <th>IGST Amount</th>
+                <th>Amount After GST</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {bills?.map((bill) => (
+                <tr key={bill.id}>
+                  <td>{formatDate(bill.billDate)}</td>
+                  <td>{bill.billNo}</td>
+                  <td>{bill.ownerName}</td>
+                  <td>{bill.stateName}</td>
+                  <td>{bill.siteName}</td>
+                  <td>{bill.flatNo}</td>
+                  <td>{bill.serviceName}</td>
+                  <td>{bill.area}</td>
+                  <td>{bill.amountBeforeGst}</td>
+                  <td>{bill.sgstAmount}</td>
+                  <td>{bill.cgstAmount}</td>
+                  <td>{bill.igstAmount}</td>
+                  <td>{bill.amountAfterGst}</td>
+                  <td>{bill.paid ? "Paid" : "Unpaid"}</td>
+                  <td>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="success"
+                        onClick={() => handleMarkAsPaid(bill.id)}
+                        disabled={bill.paid}
+                      >
+                        <FaCheckCircle className="mr-2" />
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={() => handleMarkAsUnpaid(bill.id)}
+                        disabled={!bill.paid}
+                      >
+                        <FaTimesCircle className="mr-2" />
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={() => handleDeleteBill(bill.id)}
+                      >
+                        <FaTrash className="mr-2" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
       </div>
-
-      <div className="mt-4 sm:mt-6 flex justify-center sm:justify-start">
-        <Button variant="success" onClick={handleSendBillsInBulk}>
-          Send Bills in Bulk
-        </Button>
-      </div>
-
-      {bulkBillSendStatus && (
-        <p className="text-white mt-4">{bulkBillSendStatus}</p>
-      )}
 
       {/* First Modal for Adding Bills */}
       <Modal show={showModal} onHide={closeModal}>
@@ -572,11 +622,11 @@ const BillManager = () => {
               </Form.Control>
             </Form.Group>
 
-            <Form.Group controlId="flatId">
-              <Form.Label>Flat</Form.Label>
+            <Form.Group controlId="flatId ">
+              {/* <Form.Label>Flat</Form.Label> */}
               <Button
                 variant="outline-primary"
-                className="mt-4"
+                className="my-3"
                 onClick={() => setShowFlatSelectionModal(true)}
               >
                 {newBillSecond.flatId.length > 0
@@ -644,7 +694,7 @@ const BillManager = () => {
             </Form.Group>
 
             {/* Add Entry Button */}
-            <div className="d-flex justify-content-end m-t-5">
+            <div className="d-flex justify-content-end my-2 ">
               <Button variant="primary" onClick={handleAddEntry}>
                 Add
               </Button>

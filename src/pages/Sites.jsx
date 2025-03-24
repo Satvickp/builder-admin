@@ -24,6 +24,9 @@ import {
   deleteSite,
 } from "../Api/SiteApi/SiteApi";
 
+import { getStates } from "../Api/stateapi/stateMasterApi";
+import { setStateMasters } from "../redux/Features/stateMasterSlice";
+
 const SiteMaster = () => {
   const dispatch = useDispatch();
   const { data, status, error } = useSelector((state) => state.siteMaster);
@@ -33,7 +36,7 @@ const SiteMaster = () => {
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [siteId, setSiteId] = useState(null);
-  const [stateId, setStateId] = useState(null);
+  const [stateId, setStateId] = useState();
   const [searchTerm, setSearchTerm] = useState("");
   const [newSite, setNewSite] = useState({
     name: "",
@@ -79,6 +82,23 @@ const SiteMaster = () => {
     });
   };
 
+  const fetchStateMasters = async () => {
+    dispatch(setLoading("loading"));
+    try {
+      const states = await getStates(cred.id);
+      dispatch(setStateMasters(states));
+      dispatch(setLoading("succeeded"));
+    } catch (error) {
+      console.error("Error fetching state masters:", error.message || error);
+      dispatch(setError("Failed to fetch state masters"));
+      dispatch(setLoading("failed"));
+    }
+  };
+
+  useEffect(() => {
+    fetchStateMasters();
+  }, [dispatch]);
+
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -87,7 +107,6 @@ const SiteMaster = () => {
     const { name, value } = e.target;
     setNewSite({ ...newSite, [name]: value });
   };
-
   const handleCreate = async () => {
     dispatch(setLoading());
     try {
@@ -107,12 +126,20 @@ const SiteMaster = () => {
 
   const handleUpdate = async () => {
     dispatch(setLoading());
+    console.log({
+      name: newSite.name,
+      state: stateId,
+      totalUnits: newSite.totalUnits,
+      flatTypes: newSite.flatTypes,
+      builderId: cred.id,
+    });
     try {
       await updateSiteMaster(siteId, {
-        ...newSite,
+        name: newSite.name,
+        state: stateId,
+        totalUnits: newSite.totalUnits,
+        flatTypes: newSite.flatTypes,
         builderId: cred.id,
-        totalUnits: Number(newSite.totalUnits),
-        stateMasterId: Number(newSite.stateMasterId),
       });
       fetchSites();
       setShowModal(false);
@@ -180,7 +207,6 @@ const SiteMaster = () => {
   const filteredStateMasters = stateMasters.filter((state) =>
     state.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
   return (
     <div className="container-fluid bg-slate-700 pt-20 px-2.8">
       <div className="row align-items-center mb-4">
@@ -193,11 +219,7 @@ const SiteMaster = () => {
           </Button>
         </div>
       </div>
-
-      {status === "loading" && <p className="text-white">Loading...</p>}
-      {error && <p className="text-danger">Error: {error}</p>}
-
-      <div className="table-responsive">
+      <div className="table-responsive overflow-x-auto table-container bg-white rounded-lg shadow-lg">
         <Table striped bordered hover>
           <thead>
             <tr>
@@ -309,12 +331,11 @@ const SiteMaster = () => {
               <Form.Label>Select State</Form.Label>
               <Form.Control
                 as="select"
-                value={stateId || ""}
+                value={stateId}
+                type="number"
                 onChange={(e) => handleStateSelect(e.target.value)}
               >
-                <option value="" disabled>
-                  Select State
-                </option>
+                <option value="">Select State</option>
                 {filteredStateMasters.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name}
@@ -349,7 +370,7 @@ const SiteMaster = () => {
               <Form.Control
                 type="number"
                 name="flatTypes"
-                value={newSite.flatTypes.join(", ")}
+                value={newSite.flatTypes.join(",")}
                 onChange={(e) =>
                   setNewSite({
                     ...newSite,

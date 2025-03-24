@@ -120,7 +120,7 @@ export const sendBillInBulk = async (bulkBillSendReqList) => {
 //     },
 //   });
 
-export const getAllPaidOrUnPaidBillAmountByDate = async (token, data) => {
+export const getAllPaidOrUnPaidBillAmountByDate = async (data) => {
   const url = `${baseUrl}/getAllPaidOrUnPaidBillAmountByDate`;
   const resp = await axios({
     method: "POST",
