@@ -30,8 +30,8 @@ export const createState = async (newState) => {
   return response.data;
 };
 
-export const updateState = async (code, updatedState) => {
-  const response = await axios.put(`${baseUrl}/update/${code}`, updatedState, {
+export const updateState = async (id, updatedState) => {
+  const response = await axios.put(`${baseUrl}/update/${id}`, updatedState, {
     headers: {
       accept: "*/*",
       "Content-Type": "application/json",

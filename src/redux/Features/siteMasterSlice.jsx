@@ -1,44 +1,43 @@
 // src/features/siteMasterSlice.js
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   data: [],
-  status: 'idle',
+  status: "idle",
   error: null,
 };
 
 const siteMasterSlice = createSlice({
-  name: 'siteMaster',
+  name: "siteMaster",
   initialState,
   reducers: {
     setSiteMasters(state, action) {
-      console.log(action.payload)
       state.data = action.payload;
-      state.status = 'succeeded';
+      state.status = "succeeded";
     },
     setLoading(state) {
-      state.status = 'loading';
+      state.status = "loading";
     },
     setError(state, action) {
-      state.status = 'failed';
+      state.status = "failed";
       state.error = action.payload;
     },
     addSiteMaster(state, action) {
       state.data.push(action.payload);
-      state.status = 'succeeded';
+      state.status = "succeeded";
     },
     updateSiteMaster(state, action) {
       const updatedSite = action.payload;
       const index = state.data.findIndex((site) => site.id === updatedSite.id);
       if (index !== -1) {
         state.data[index] = updatedSite;
-        state.status = 'succeeded';
+        state.status = "succeeded";
       }
     },
     deleteSiteMaster(state, action) {
       const siteId = action.payload;
       state.data = state.data.filter((site) => site.id !== siteId);
-      state.status = 'succeeded';
+      state.status = "succeeded";
     },
   },
 });

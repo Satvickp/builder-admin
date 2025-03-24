@@ -73,7 +73,6 @@ function States() {
     }
     return null;
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorState("");
@@ -95,7 +94,7 @@ function States() {
     dispatch(setLoading("loading"));
     try {
       if (isEdit && currentState && currentState.code) {
-        const updatedState = await updateState(currentState.code, newState);
+        const updatedState = await updateState(currentState.id, newState);
         console.log("Updated state:", updatedState); // Debug API response
         dispatch(updateStateMaster(updatedState));
       } else {
@@ -177,7 +176,7 @@ function States() {
         </div>
       </div>
 
-      <div className="table-responsive">
+      <div className="table-responsive overflow-x-auto table-container bg-white rounded-lg shadow-lg">
         <Table striped bordered hover>
           <thead>
             <tr>
