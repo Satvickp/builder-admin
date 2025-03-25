@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -29,11 +29,13 @@ function SignIn() {
   const [userId, setUserId] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSignIn = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
     dispatch(loginRequest());
     try {
       const response = await axios.post(
@@ -61,6 +63,7 @@ function SignIn() {
         error.response?.data?.message ||
         "Failed to login. Please check your credentials.";
       dispatch(loginFailure(errorMessage));
+      setErrorMessage(errorMessage);
       Swal.fire({
         icon: "error",
         title: "Login Failed",
@@ -127,6 +130,9 @@ function SignIn() {
         <div className="left-panel w-full md:w-1/2 h-full p-4 md:p-8 bg-[#f4f5f7] flex flex-col justify-center">
           <div className="form-container bg-white p-6 md:p-10 rounded-lg shadow-lg w-full max-w-[500px] mx-auto">
             <h2 className="text-2xl font-semibold mb-4 text-black">Sign In</h2>
+            {errorMessage && (
+              <p className="text-red-500 mb-4 text-center">{errorMessage}</p>
+            )}
             <form onSubmit={handleSignIn}>
               <div className="form-group mb-4">
                 <label
